@@ -4,320 +4,1091 @@
   <meta charset="UTF-8">
   <title>Products - Home Haven</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <style>
-    .product-page-container {
-      max-width: 1200px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-      padding: 32px 32px 24px 32px;
-    }
-    .product-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-    .product-header h2 {
-      font-family: Georgia, serif;
-      font-size: 2.1rem;
-      color: #8B5C2A;
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .product-filters {
-      display: flex;
-      align-items: center;
-      gap: 1.2rem;
-      flex-wrap: wrap;
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
     }
-    .product-filters input, .product-filters select {
-      padding: 7px 12px;
-      border-radius: 6px;
-      border: 1px solid #bfa77a;
-      font-size: 1rem;
-      background: #f7f4f0;
+
+    .loading-spinner {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
     }
-    .category-list {
-      display: flex;
-      gap: 1.1rem;
-      flex-wrap: wrap;
-      margin: 18px 0 28px 0;
-      justify-content: center;
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #8B5C2A;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
-    .category-btn {
-      background: #f3ede5;
-      color: #8B5C2A;
-      border: 1px solid #bfa77a;
-      border-radius: 8px;
-      padding: 7px 18px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
-    .category-btn.active, .category-btn:hover {
-      background: #8B5C2A;
-      color: #fff;
+
+    .product-page-container {
+      max-width: 1100px;
+      margin: 10px auto;
+      padding: 0 8px;
     }
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 32px 24px;
-      margin-top: 10px;
+
+    .hero-section {
+      background: linear-gradient(135deg, #8B5C2A 0%, #A67C52 100%);
+      color: white;
+      padding: 28px 12px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(139, 92, 42, 0.18);
     }
-    .product-card {
-      background: #f3ede5;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      padding: 18px 16px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+
+    .hero-section h1 {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+      font-weight: 400;
+    }
+
+    .hero-section p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin-bottom: 14px;
+    }
+
+    .search-container {
+      max-width: 350px;
+      margin: 0 auto;
       position: relative;
     }
-    .product-img {
-      width: 160px;
-      height: 160px;
+
+    .search-input {
+      width: 100%;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 24px;
+      font-size: 0.98rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+    .search-btn {
+      position: absolute;
+      right: 2px;
+      top: 2px;
       background: #8B5C2A;
-      border-radius: 12px;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-btn:hover {
+      background: #A67C52;
+      transform: scale(1.1);
+    }
+
+    .filters-section {
+      background: white;
+      padding: 12px 8px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.85rem;
+    }
+
+    .filter-select {
+      padding: 5px 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      min-width: 90px;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #8B5C2A;
+      box-shadow: 0 0 0 3px rgba(139, 92, 42, 0.1);
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .category-tab {
+      padding: 5px 12px;
+      border: 2px solid #8B5C2A;
+      background: transparent;
+      color: #8B5C2A;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .category-tab:hover,
+    .category-tab.active {
+      background: #8B5C2A;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(139, 92, 42, 0.3);
+    }
+
+    .products-section {
+      margin-bottom: 18px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 10px;
+    }
+
+    .view-btn {
+      padding: 4px 8px;
+      border: 2px solid #8B5C2A;
+      background: transparent;
+      color: #8B5C2A;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .view-btn.active {
+      background: #8B5C2A;
+      color: white;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .products-list {
+      display: none;
+    }
+
+    .products-list.active {
+      display: block;
+    }
+
+    .product-item-list {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .product-item-list:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 110px;
+      background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 2.5rem;
+      position: relative;
       overflow: hidden;
     }
-    .product-title-row {
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image img {
+      transform: scale(1.1);
+    }
+
+    .product-image-placeholder {
+      font-size: 4rem;
+      color: #8B5C2A;
+      opacity: 0.3;
+    }
+
+    .product-badges {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .badge.featured {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    }
+
+    .badge.new {
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    }
+
+    .badge.low-stock {
+      background: linear-gradient(135deg, #feca57, #ff9ff3);
+      color: #333;
+    }
+
+    .product-actions {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .action-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      color: #8B5C2A;
+      cursor: pointer;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.3em;
-      margin-bottom: 4px;
-      width: 100%;
-      text-align: center;
+      font-size: 0.95rem;
     }
+
+    .action-btn:hover {
+      background: #8B5C2A;
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .action-btn.active {
+      background: #ff6b6b;
+      color: white;
+    }
+
+    .product-content {
+      padding: 10px 8px 8px 8px;
+    }
+
+    .product-category {
+      color: #8B5C2A;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
     .product-title {
-      font-size: 1.2rem;
-      font-family: Georgia, serif;
-      color: #8B5C2A;
+      font-size: 1.02rem;
       font-weight: 600;
-      text-align: center;
-      flex: 0 1 auto;
+      color: #333;
+      margin-bottom: 4px;
+      line-height: 1.3;
     }
-    .wishlist-btn {
-      background: none;
+
+    .product-description {
+      color: #666;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .product-price {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #8B5C2A;
+    }
+
+    .product-stock {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .stock-available {
+      color: #27ae60;
+    }
+
+    .stock-low {
+      color: #f39c12;
+    }
+
+    .stock-out {
+      color: #e74c3c;
+    }
+
+    .product-buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 6px 10px;
       border: none;
-      font-size: 1.5rem;
-      color: #8B5C2A;
-      cursor: pointer;
-      transition: color 0.2s;
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      z-index: 4;
-    }
-    .wishlist-btn.active {
-      color: #e67e22;
-    }
-    .featured-ribbon {
-      position: absolute;
-      top: 12px;
-      left: 0;
-      background: #b0b9d6;
-      color: #444;
-      font-size: 1rem;
+      border-radius: 6px;
       font-weight: 600;
-      padding: 2px 18px 2px 8px;
-      border-radius: 0 10px 10px 0;
-      z-index: 3;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+      display: inline-block;
+      font-size: 0.95rem;
     }
-    @media (max-width: 700px) {
-      .product-page-container { padding: 12px 2vw; }
-      .products-grid { gap: 18px 8px; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #8B5C2A, #A67C52);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(139, 92, 42, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #8B5C2A;
+      border: 2px solid #8B5C2A;
+    }
+
+    .btn-secondary:hover {
+      background: #8B5C2A;
+      color: white;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .no-products {
+      text-align: center;
+      padding: 24px 8px;
+      color: #666;
+      font-size: 1rem;
+    }
+
+    .no-products i {
+      font-size: 4rem;
+      color: #ddd;
+      margin-bottom: 20px;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .page-btn {
+      padding: 4px 8px;
+      border: 2px solid #8B5C2A;
+      background: transparent;
+      color: #8B5C2A;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .page-btn.active,
+    .page-btn:hover {
+      background: #8B5C2A;
+      color: white;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+    }
+
+    .toast.error {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+
+    .wishlist-heart {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      background: rgba(255,255,255,0.92);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e74c3c;
+      font-size: 1.15rem;
+      z-index: 10;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      transition: background 0.2s, color 0.2s, transform 0.1s;
+    }
+    .wishlist-heart:hover, .wishlist-heart:focus {
+      background: #ffeaea;
+      color: #c0392b;
+      transform: scale(1.1);
+    }
+    .wishlist-heart .fas.fa-heart {
+      color: #e74c3c;
+    }
+    .wishlist-heart .far.fa-heart {
+      color: #bbb;
+    }
+
+    @media (max-width: 768px) {
+      .hero-section {
+        padding: 12px 4px;
+      }
+
+      .hero-section h1 {
+        font-size: 2rem;
+      }
+
+      .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .product-item-list {
+        flex-direction: column;
+        text-align: center;
+      }
+      .product-image {
+        height: 70px;
+      }
     }
   </style>
-  <script>
-    // Override injectHeader to load header_customer.html
-    function injectHeader() {
-      const path = window.location.pathname;
-      if (path.includes('login.html') || path.includes('signup.html')) return;
-      fetch('header_customer.html')
-        .then(res => res.text())
-        .then(html => {
-          const headerDiv = document.createElement('div');
-          headerDiv.innerHTML = html;
-          document.body.insertBefore(headerDiv, document.body.firstChild);
-          if (typeof updateHeaderLoginState === 'function') updateHeaderLoginState();
-        })
-        .catch(error => {
-          console.error('Failed to load header:', error);
-        });
-    }
-    // Product data (2 per category, placeholder images)
-    const categories = [
-      "Living Room", "Bedroom", "Kitchen and Dining", "Bathroom", "Office", "Outdoor", "Lighting", "Storage", "Wall Art", "Seasonal"
-    ];
-    const products = [
-      { name: "Sofa Deluxe", price: 12000, date: "2024-06-01", category: "Living Room", desc: "Comfy 3-seater sofa.", img: "", id: 1 },
-      { name: "Coffee Table", price: 3500, date: "2024-05-20", category: "Living Room", desc: "Modern wooden coffee table.", img: "", id: 2 },
-      { name: "Queen Bed", price: 15000, date: "2024-05-15", category: "Bedroom", desc: "Spacious queen-size bed.", img: "", id: 3 },
-      { name: "Nightstand", price: 2200, date: "2024-05-18", category: "Bedroom", desc: "Minimalist nightstand.", img: "", id: 4 },
-      { name: "Dining Set", price: 18000, date: "2024-05-10", category: "Kitchen and Dining", desc: "6-seater dining set.", img: "", id: 5 },
-      { name: "Bar Stool", price: 1200, date: "2024-05-12", category: "Kitchen and Dining", desc: "Adjustable bar stool.", img: "", id: 6 },
-      { name: "Shower Curtain", price: 600, date: "2024-05-08", category: "Bathroom", desc: "Waterproof curtain.", img: "", id: 7 },
-      { name: "Bath Mat", price: 400, date: "2024-05-09", category: "Bathroom", desc: "Soft absorbent mat.", img: "", id: 8 },
-      { name: "Office Chair", price: 3500, date: "2024-05-05", category: "Office", desc: "Ergonomic chair.", img: "", id: 9 },
-      { name: "Desk Organizer", price: 800, date: "2024-05-06", category: "Office", desc: "Keep your desk tidy.", img: "", id: 10 },
-      { name: "Patio Set", price: 9000, date: "2024-05-01", category: "Outdoor", desc: "Outdoor table & chairs.", img: "", id: 11 },
-      { name: "Garden Lamp", price: 950, date: "2024-05-03", category: "Outdoor", desc: "Solar-powered lamp.", img: "", id: 12 },
-      { name: "Pendant Light", price: 2500, date: "2024-04-28", category: "Lighting", desc: "Elegant pendant light.", img: "", id: 13 },
-      { name: "Table Lamp", price: 1100, date: "2024-04-29", category: "Lighting", desc: "Classic table lamp.", img: "", id: 14 },
-      { name: "Storage Box", price: 400, date: "2024-04-25", category: "Storage", desc: "Foldable storage box.", img: "", id: 15 },
-      { name: "Bookshelf", price: 3200, date: "2024-04-26", category: "Storage", desc: "5-tier bookshelf.", img: "", id: 16 },
-      { name: "Canvas Art", price: 1800, date: "2024-04-22", category: "Wall Art", desc: "Abstract canvas art.", img: "", id: 17 },
-      { name: "Wall Clock", price: 950, date: "2024-04-23", category: "Wall Art", desc: "Modern wall clock.", img: "", id: 18 },
-      { name: "Christmas Tree", price: 2500, date: "2023-12-01", category: "Seasonal", desc: "6ft artificial tree.", img: "", id: 19 },
-      { name: "Pumpkin Decor", price: 700, date: "2023-10-10", category: "Seasonal", desc: "Festive pumpkin decor.", img: "", id: 20 }
-    ];
-    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    function isWishlisted(id) {
-      return wishlist.includes(id);
-    }
-    function toggleWishlist(id) {
-      if (isWishlisted(id)) {
-        wishlist = wishlist.filter(wid => wid !== id);
-      } else {
-        wishlist.push(id);
-      }
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    }
-    let selectedCategory = '';
-    function getFeaturedProducts() {
-      return products.slice().sort(()=>0.5-Math.random()).slice(0,3);
-    }
-    function renderCategories() {
-      const catList = $("#categoryList");
-      catList.empty();
-      catList.append(<button class="category-btn${selectedCategory===''?' active':''}" data-cat="">All</button>);
-      categories.forEach(cat => {
-        catList.append(<button class="category-btn${selectedCategory===cat?' active':''}" data-cat="${cat}">${cat}</button>);
-      });
-    }
-    function renderFeatured() {
-      const all = products.slice();
-      const shuffled = all.slice().sort(()=>0.5-Math.random());
-      const featured = shuffled.slice(0,3);
-      const grid = $("#featuredGrid");
-      grid.empty();
-      featured.forEach(prod => {
-        grid.append(`
-          <div class="product-card">
-            <button class="wishlist-btn${isWishlisted(prod.id)?' active':''}" data-id="${prod.id}" title="Add to Wishlist">${isWishlisted(prod.id)?'&#9733;':'&#9734;'}</button>
-            <div class="featured-ribbon">Featured</div>
-            <div class="product-img"><span>&#128717;</span></div>
-            <div class="product-title-row">
-              <div class="product-title">${prod.name}</div>
-            </div>
-            <div class="product-desc">${prod.desc}</div>
-            <div class="product-price">₱${prod.price.toLocaleString()}</div>
-            <div class="product-date">${prod.date}</div>
-            <div class="product-actions">
-              <button>Add to Cart</button>
-              <button>View Details</button>
-            </div>
-          </div>
-        `);
-      });
-    }
-    function renderProducts() {
-      let filtered = products.slice();
-      $('#productsHeading').text('Products');
-      const search = $("#searchInput").val().toLowerCase();
-      if (search) {
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
-      }
-      if (selectedCategory) {
-        filtered = filtered.filter(p => p.category === selectedCategory);
-      }
-      const sort = $("#sortSelect").val();
-      if (sort === "price") filtered.sort((a,b)=>a.price-b.price);
-      if (sort === "date") filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
-      const grid = $("#productsGrid");
-      grid.empty();
-      if (!filtered.length) {
-        grid.append('<div style="grid-column:1/-1;text-align:center;color:#888;font-size:1.2rem;">No products found.</div>');
-        return;
-      }
-      filtered.forEach(prod => {
-        grid.append(`
-          <div class="product-card">
-            <button class="wishlist-btn${isWishlisted(prod.id)?' active':''}" data-id="${prod.id}" title="Add to Wishlist">${isWishlisted(prod.id)?'&#9733;':'&#9734;'}</button>
-            <div class="product-img"><span>&#128717;</span></div>
-            <div class="product-title-row">
-              <div class="product-title">${prod.name}</div>
-            </div>
-            <div class="product-desc">${prod.desc}</div>
-            <div class="product-price">₱${prod.price.toLocaleString()}</div>
-            <div class="product-date">${prod.date}</div>
-            <div class="product-actions">
-              <button>Add to Cart</button>
-              <button>View Details</button>
-            </div>
-          </div>
-        `);
-      });
-    }
-    $(document).ready(function() {
-      injectHeader();
-      renderCategories();
-      renderFeatured();
-      renderProducts();
-      $("#categoryList").on("click", ".category-btn", function() {
-        selectedCategory = $(this).data("cat");
-        renderCategories();
-        renderFeatured();
-        renderProducts();
-      });
-      $("#searchInput").on("input", renderProducts);
-      $("#sortSelect").on("change", renderProducts);
-      $(document).on('click', '.wishlist-btn', function(e) {
-        const id = $(this).data('id');
-        toggleWishlist(id);
-        renderProducts();
-        renderFeatured();
-      });
-    });
-  </script>
 </head>
 <body>
-  <div style="height:84px;"></div>
-  <div id="featuredContainer" class="product-page-container">
-    <h2 style="font-family:Georgia,serif; color:#8B5C2A; font-size:2rem; margin-bottom:0.5em;">Featured</h2>
-    <div class="products-grid" id="featuredGrid"></div>
+  <div class="loading-spinner">
+    <div class="spinner"></div>
   </div>
+
   <div class="product-page-container">
-    <div class="product-header">
-      <h2 id="productsHeading">Products</h2>
-      <div class="product-filters">
-        <input type="text" id="searchInput" placeholder="Search products...">
-        <select id="sortSelect">
-          <option value="">Sort By</option>
-          <option value="price">Price</option>
-          <option value="date">Date</option>
-        </select>
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <h1>Discover Your Perfect Home</h1>
+      <p>Explore our curated collection of premium furniture and home decor</p>
+      <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search for furniture, decor, or anything home-related...">
+        <button class="search-btn" id="searchBtn">
+          <i class="fas fa-search"></i>
+        </button>
       </div>
     </div>
-    <div class="category-list" id="categoryList">
-      <!-- Category buttons will be injected here -->
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>Sort By</label>
+          <select class="filter-select" id="sortSelect">
+            <option value="">Latest</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="name">Name A-Z</option>
+            <option value="stock">Stock Available</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Price Range</label>
+          <select class="filter-select" id="priceFilter">
+            <option value="">All Prices</option>
+            <option value="0-1000">Under ₱1,000</option>
+            <option value="1000-5000">₱1,000 - ₱5,000</option>
+            <option value="5000-15000">₱5,000 - ₱15,000</option>
+            <option value="15000+">Over ₱15,000</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Stock Status</label>
+          <select class="filter-select" id="stockFilter">
+            <option value="">All Items</option>
+            <option value="in-stock">In Stock</option>
+            <option value="low-stock">Low Stock</option>
+            <option value="out-of-stock">Out of Stock</option>
+          </select>
+        </div>
+      </div>
+      <div class="category-tabs" id="categoryTabs">
+        <!-- Categories will be loaded here -->
+      </div>
     </div>
-    <div class="products-grid" id="productsGrid">
-      <!-- Product cards will be injected here -->
+
+    <!-- Featured Products -->
+    <div class="products-section">
+      <div class="section-header">
+        <h2 class="section-title">Featured Products</h2>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid">
+            <i class="fas fa-th"></i>
+          </button>
+          <button class="view-btn" data-view="list">
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+      </div>
+      <div class="products-grid" id="featuredGrid">
+        <!-- Featured products will be loaded here -->
+      </div>
+    </div>
+
+    <!-- All Products -->
+    <div class="products-section">
+      <div class="section-header">
+        <h2 class="section-title">All Products</h2>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid">
+            <i class="fas fa-th"></i>
+          </button>
+          <button class="view-btn" data-view="list">
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+      </div>
+      <div class="products-grid" id="productsGrid">
+        <!-- Products will be loaded here -->
+      </div>
+      <div class="products-list" id="productsList">
+        <!-- List view products will be loaded here -->
+      </div>
+      <div class="pagination" id="pagination">
+        <!-- Pagination will be generated here -->
+      </div>
     </div>
   </div>
+
+  <script>
+    // Global variables
+    let allProducts = [];
+    let filteredProducts = [];
+    let categories = [];
+    let currentPage = 1;
+    let productsPerPage = 12;
+    let currentView = 'grid';
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const API_BASE = 'http://localhost:4000/api/v1';
+
+    // Show loading spinner
+    function showLoading() {
+      $('.loading-spinner').show();
+    }
+
+    // Hide loading spinner
+    function hideLoading() {
+      $('.loading-spinner').hide();
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const toast = $(`<div class="toast ${type}">${message}</div>`);
+      $('body').append(toast);
+      setTimeout(() => toast.addClass('show'), 100);
+      setTimeout(() => {
+        toast.removeClass('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Load categories
+    async function loadCategories() {
+      try {
+        const response = await fetch(`${API_BASE}/products/categories`);
+        const data = await response.json();
+        if (data.success) {
+          categories = data.categories;
+          renderCategoryTabs();
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+
+    // Render category tabs
+    function renderCategoryTabs() {
+      const tabsContainer = $('#categoryTabs');
+      tabsContainer.empty();
+      
+      // Add "All" tab
+      tabsContainer.append(`
+        <button class="category-tab active" data-category="">All Categories</button>
+      `);
+      
+      // Add category tabs
+      categories.forEach(category => {
+        tabsContainer.append(`
+          <button class="category-tab" data-category="${category.category_id}">${category.name}</button>
+        `);
+      });
+    }
+
+    // Load all products
+    async function loadProducts() {
+      showLoading();
+      try {
+        const response = await fetch(`${API_BASE}/products`);
+        const data = await response.json();
+        if (data.success) {
+          allProducts = data.products;
+          filteredProducts = [...allProducts];
+          renderProducts();
+          renderFeaturedProducts();
+        } else {
+          showToast('Failed to load products', 'error');
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        showToast('Error connecting to server', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Filter products
+    function filterProducts() {
+      let filtered = [...allProducts];
+      
+      // Search filter
+      const searchTerm = $('#searchInput').val().toLowerCase();
+      if (searchTerm) {
+        filtered = filtered.filter(product => 
+          product.name.toLowerCase().includes(searchTerm) ||
+          product.description.toLowerCase().includes(searchTerm) ||
+          (product.category_name && product.category_name.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      // Category filter
+      const selectedCategory = $('.category-tab.active').data('category');
+      if (selectedCategory) {
+        filtered = filtered.filter(product => product.category_id == selectedCategory);
+      }
+      
+      // Price filter
+      const priceFilter = $('#priceFilter').val();
+      if (priceFilter) {
+        const [min, max] = priceFilter.split('-').map(Number);
+        filtered = filtered.filter(product => {
+          const price = parseFloat(product.sell_price);
+          if (max) {
+            return price >= min && price <= max;
+          } else {
+            return price >= min;
+          }
+        });
+      }
+      
+      // Stock filter
+      const stockFilter = $('#stockFilter').val();
+      if (stockFilter) {
+        filtered = filtered.filter(product => {
+          const stock = parseInt(product.stock_quantity || 0);
+          switch (stockFilter) {
+            case 'in-stock': return stock > 10;
+            case 'low-stock': return stock > 0 && stock <= 10;
+            case 'out-of-stock': return stock === 0;
+            default: return true;
+          }
+        });
+      }
+      
+      // Sort products
+      const sortBy = $('#sortSelect').val();
+      switch (sortBy) {
+        case 'price-low':
+          filtered.sort((a, b) => parseFloat(a.sell_price) - parseFloat(b.sell_price));
+          break;
+        case 'price-high':
+          filtered.sort((a, b) => parseFloat(b.sell_price) - parseFloat(a.sell_price));
+          break;
+        case 'name':
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'stock':
+          filtered.sort((a, b) => parseInt(b.stock_quantity || 0) - parseInt(a.stock_quantity || 0));
+          break;
+        default:
+          filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      filteredProducts = filtered;
+      currentPage = 1;
+      renderProducts();
+    }
+
+    // Render featured products
+    function renderFeaturedProducts() {
+      const featured = allProducts.filter(p => p.status === 'active').slice(0, 3);
+      const grid = $('#featuredGrid');
+      grid.empty();
+      
+      if (featured.length === 0) {
+        grid.append('<div class="no-products"><i class="fas fa-box-open"></i><p>No featured products available</p></div>');
+        return;
+      }
+      
+      featured.forEach(product => {
+        grid.append(createProductCard(product, true));
+      });
+    }
+
+    // Create product card HTML
+    function createProductCard(product, isFeatured = false) {
+      const stock = parseInt(product.stock_quantity || 0);
+      const stockClass = stock === 0 ? 'stock-out' : stock <= 10 ? 'stock-low' : 'stock-available';
+      const stockText = stock === 0 ? 'Out of Stock' : stock <= 10 ? `Only ${stock} left` : 'In Stock';
+      const isWishlisted = wishlist.includes(product.item_id);
+      
+      return `
+        <div class="product-card" data-id="${product.item_id}">
+          <button class="wishlist-heart" data-id="${product.item_id}" title="${isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}">
+            <i class="fa${isWishlisted ? 's' : 'r'} fa-heart"></i>
+          </button>
+          ${isFeatured ? '<div class="badge featured">Featured</div>' : ''}
+          ${stock <= 5 && stock > 0 ? '<div class="badge low-stock">Low Stock</div>' : ''}
+          <div class="product-actions">
+            <button class="action-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${product.item_id})" title="${isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}">
+              <i class="fas fa-heart"></i>
+            </button>
+            <button class="action-btn" onclick="quickView(${product.item_id})" title="Quick View">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="product-image">
+            ${product.image ? 
+              `<img src="${product.image}" alt="${product.name}" onerror="this.parentElement.innerHTML='<div class=\\'product-image-placeholder\\'><i class=\\'fas fa-couch\\'></i></div>'">` :
+              `<div class="product-image-placeholder"><i class="fas fa-couch"></i></div>`
+            }
+          </div>
+          <div class="product-content">
+            <div class="product-category">${product.category_name || 'Uncategorized'}</div>
+            <h3 class="product-title">${product.name}</h3>
+            <p class="product-description">${product.description}</p>
+            <div class="product-meta">
+              <div class="product-price">₱${parseFloat(product.sell_price).toLocaleString()}</div>
+              <div class="product-stock ${stockClass}">${stockText}</div>
+            </div>
+            <div class="product-buttons">
+              <button class="btn btn-primary" onclick="addToCart(${product.item_id})" ${stock === 0 ? 'disabled' : ''}>
+                <i class="fas fa-shopping-cart"></i> Add to Cart
+              </button>
+              <button class="btn btn-secondary" onclick="viewProduct(${product.item_id})">
+                <i class="fas fa-info-circle"></i> Details
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Create product list item HTML
+    function createProductListItem(product) {
+      const stock = parseInt(product.stock_quantity || 0);
+      const stockClass = stock === 0 ? 'stock-out' : stock <= 10 ? 'stock-low' : 'stock-available';
+      const stockText = stock === 0 ? 'Out of Stock' : stock <= 10 ? `Only ${stock} left` : 'In Stock';
+      const isWishlisted = wishlist.includes(product.item_id);
+      
+      return `
+        <div class="product-item-list" data-id="${product.item_id}">
+          <div class="product-image" style="width: 120px; height: 120px; border-radius: 10px;">
+            ${product.image ? 
+              `<img src="${product.image}" alt="${product.name}" onerror="this.parentElement.innerHTML='<div class=\\'product-image-placeholder\\'><i class=\\'fas fa-couch\\'></i></div>'">` :
+              `<div class="product-image-placeholder"><i class="fas fa-couch"></i></div>`
+            }
+          </div>
+          <div style="flex: 1;">
+            <div class="product-category">${product.category_name || 'Uncategorized'}</div>
+            <h3 class="product-title">${product.name}</h3>
+            <p class="product-description">${product.description}</p>
+            <div class="product-meta">
+              <div class="product-price">₱${parseFloat(product.sell_price).toLocaleString()}</div>
+              <div class="product-stock ${stockClass}">${stockText}</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <button class="action-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${product.item_id})" title="${isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}">
+              <i class="fas fa-heart"></i>
+            </button>
+            <button class="btn btn-primary" onclick="addToCart(${product.item_id})" ${stock === 0 ? 'disabled' : ''}>
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+            <button class="btn btn-secondary" onclick="viewProduct(${product.item_id})">
+              <i class="fas fa-info-circle"></i> Details
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render products
+    function renderProducts() {
+      const startIndex = (currentPage - 1) * productsPerPage;
+      const endIndex = startIndex + productsPerPage;
+      const pageProducts = filteredProducts.slice(startIndex, endIndex);
+      
+      const grid = $('#productsGrid');
+      const list = $('#productsList');
+      
+      grid.empty();
+      list.empty();
+      
+      if (pageProducts.length === 0) {
+        const noProductsHtml = '<div class="no-products"><i class="fas fa-search"></i><p>No products found matching your criteria</p></div>';
+        grid.append(noProductsHtml);
+        list.append(noProductsHtml);
+        $('#pagination').empty();
+        return;
+      }
+      
+      // Render grid view
+      pageProducts.forEach(product => {
+        grid.append(createProductCard(product));
+      });
+      
+      // Render list view
+      pageProducts.forEach(product => {
+        list.append(createProductListItem(product));
+      });
+      
+      renderPagination();
+    }
+
+    // Render pagination
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+      const pagination = $('#pagination');
+      pagination.empty();
+      
+      if (totalPages <= 1) return;
+      
+      // Previous button
+      if (currentPage > 1) {
+        pagination.append(`<button class="page-btn" onclick="changePage(${currentPage - 1})">Previous</button>`);
+      }
+      
+      // Page numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          pagination.append(`<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`);
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+          pagination.append('<span>...</span>');
+        }
+      }
+      
+      // Next button
+      if (currentPage < totalPages) {
+        pagination.append(`<button class="page-btn" onclick="changePage(${currentPage + 1})">Next</button>`);
+      }
+    }
+
+    // Change page
+    function changePage(page) {
+      currentPage = page;
+      renderProducts();
+      $('html, body').animate({ scrollTop: $('.products-section').offset().top - 100 }, 500);
+    }
+
+    // Toggle wishlist
+    function toggleWishlist(productId) {
+      const index = wishlist.indexOf(productId);
+      if (index > -1) {
+        wishlist.splice(index, 1);
+        showToast('Removed from wishlist');
+      } else {
+        wishlist.push(productId);
+        showToast('Added to wishlist');
+      }
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+      renderProducts();
+      renderFeaturedProducts();
+    }
+
+    // Add to cart
+    function addToCart(productId) {
+      // TODO: Implement cart functionality
+      showToast('Added to cart!');
+    }
+
+    // Quick view
+    function quickView(productId) {
+      // TODO: Implement quick view modal
+      showToast('Quick view feature coming soon!');
+    }
+
+    // View product details
+    function viewProduct(productId) {
+      // TODO: Navigate to product detail page
+      showToast('Product details page coming soon!');
+    }
+
+    // Initialize
+    $(document).ready(function() {
+      loadCategories();
+      loadProducts();
+      
+      // Event listeners
+      $('#searchInput, #sortSelect, #priceFilter, #stockFilter').on('input change', filterProducts);
+      
+      $('#searchBtn').click(filterProducts);
+      
+      $('#searchInput').on('keypress', function(e) {
+        if (e.which === 13) filterProducts();
+      });
+      
+      $(document).on('click', '.category-tab', function() {
+        $('.category-tab').removeClass('active');
+        $(this).addClass('active');
+        filterProducts();
+      });
+      
+      $(document).on('click', '.view-btn', function() {
+        const view = $(this).data('view');
+        $('.view-btn').removeClass('active');
+        $(this).addClass('active');
+        
+        if (view === 'grid') {
+          $('#productsGrid').show();
+          $('#productsList').hide();
+        } else {
+          $('#productsGrid').hide();
+          $('#productsList').show();
+        }
+      });
+    });
+
+    $(document).on('click', '.wishlist-heart', function(e) {
+      e.preventDefault();
+      const id = parseInt($(this).data('id'));
+      toggleWishlist(id);
+    });
+  </script>
 </body>
 </html> 
