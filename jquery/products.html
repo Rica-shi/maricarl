@@ -503,23 +503,23 @@
       </div>
 
       <div class="table-container">
-        <table id="productsTable">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
+    <table id="productsTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
               <th>Category</th>
-              <th>Price</th>
+          <th>Price</th>
               <th>Stock</th>
-              <th>Status</th>
+          <th>Status</th>
               <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+          <th>Actions</th>
+        </tr>
+      </thead>
           <tbody>
             <!-- Products will be loaded here -->
           </tbody>
-        </table>
+    </table>
       </div>
     </div>
   </div>
@@ -560,10 +560,10 @@
           
           <div class="form-group">
             <label for="status">Status</label>
-            <select id="status" name="status">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+          <select id="status" name="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
           </div>
           
           <div class="form-group">
@@ -861,7 +861,7 @@
         
         try {
           const url = id ? `${API_URL}/products/${id}` : `${API_URL}/products`;
-          const method = id ? 'PUT' : 'POST';
+        const method = id ? 'PUT' : 'POST';
           
           const response = await fetch(url, {
             method: method,

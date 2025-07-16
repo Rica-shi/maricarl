@@ -49,14 +49,32 @@
     }
     .details-rating i.fas.fa-star { color: #ffe066; }
     .details-rating i.far.fa-star { color: #ddd; }
+    .qty-error { border: 2px solid #e74c3c !important; box-shadow: 0 0 6px #e74c3c; }
+    .carousel-nav-btn {
+      transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
+      opacity: 0.7;
+    }
+    .carousel-nav-btn:hover {
+      background: #8B5C2A;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      opacity: 1.0;
+    }
   </style>
 </head>
 <body>
   <div style="height:64px;"></div>
   <div class="details-container">
     <div class="details-left">
-      <div class="carousel-main-img" id="mainImg"><!-- Main image here --></div>
-      <div class="carousel-thumbs" id="thumbsRow"><!-- Thumbnails here --></div>
+      <div class="carousel-main-img" id="mainImg" style="position:relative;">
+        <button id="carouselPrev" class="carousel-nav-btn" style="position:absolute;left:0;top:50%;transform:translateY(-50%);background:#8B5C2A;color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:1.3rem;cursor:pointer;z-index:2;">
+          <span style="font-size:1.5rem;">&#8592;</span>
+        </button>
+        <img id="carouselImage" src="/jquery/img/logo.png" alt="Product Image" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">
+        <button id="carouselNext" class="carousel-nav-btn" style="position:absolute;right:0;top:50%;transform:translateY(-50%);background:#8B5C2A;color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:1.3rem;cursor:pointer;z-index:2;">
+          <span style="font-size:1.5rem;">&#8594;</span>
+        </button>
+      </div>
+      <div class="carousel-thumbs" id="thumbsRow" style="justify-content:center;"></div>
       <div class="details-desc" id="desc">Loading description...</div>
     </div>
     <div class="details-right">
@@ -91,6 +109,7 @@
       </div>
     </div>
   </div>
+  <div id="wishlistNotify" style="display:none;position:fixed;top:30px;left:50%;transform:translateX(-50%);background:#8B5C2A;color:#fff;padding:12px 28px;border-radius:8px;font-size:1.05rem;z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,0.13);transition:opacity 0.2s;"></div>
   <script>
     // --- Helper: Get product ID from URL ---
     function getProductId() {
@@ -104,12 +123,26 @@
       $('#wishlistBtn i').toggleClass('fas', isWishlisted).toggleClass('far', !isWishlisted);
       $('#wishlistBtn').attr('title', isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist');
     }
+    function showWishlistNotify(added) {
+      const msg = added ? 'Added to wishlist!' : 'Removed from wishlist.';
+      $('#wishlistNotify').text(msg).css({display:'block',opacity:1});
+      setTimeout(()=>{
+        $('#wishlistNotify').fadeOut(400);
+      }, 1200);
+    }
     function toggleWishlist(productId) {
       const idx = wishlist.indexOf(productId);
-      if (idx > -1) wishlist.splice(idx, 1);
-      else wishlist.push(productId);
+      let added = false;
+      if (idx > -1) {
+        wishlist.splice(idx, 1);
+        added = false;
+      } else {
+        wishlist.push(productId);
+        added = true;
+      }
       localStorage.setItem('wishlist', JSON.stringify(wishlist));
       updateWishlistBtn(productId);
+      showWishlistNotify(added);
     }
     // --- Carousel logic ---
     let images = [];
@@ -117,7 +150,7 @@
     function renderCarousel() {
       // Main image
       const mainImg = images[currentImgIdx] || '';
-      $('#mainImg').html(mainImg ? `<img src="${mainImg}" alt="Product Image" onerror="this.src='/jquery/img/logo.png'">` : '<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:2rem;">No Image</div>');
+      $('#carouselImage').attr('src', mainImg ? mainImg : '/jquery/img/logo.png');
       // Thumbnails
       let thumbsHtml = '';
       images.forEach((img, idx) => {
@@ -125,20 +158,21 @@
       });
       $('#thumbsRow').html(thumbsHtml);
     }
+    // Carousel arrow events
+    $(document).on('click', '#carouselPrev', function() {
+      currentImgIdx = (currentImgIdx - 1 + images.length) % images.length;
+      renderCarousel();
+    });
+    $(document).on('click', '#carouselNext', function() {
+      currentImgIdx = (currentImgIdx + 1) % images.length;
+      renderCarousel();
+    });
     $(document).on('click', '.carousel-thumb', function() {
       currentImgIdx = parseInt($(this).data('idx'));
       renderCarousel();
     });
     // --- Quantity logic ---
     let maxQty = 1;
-    $('#qtyMinus').click(function() {
-      let val = parseInt($('#qtyInput').val(), 10);
-      if (val > 1) $('#qtyInput').val(val - 1);
-    });
-    $('#qtyPlus').click(function() {
-      let val = parseInt($('#qtyInput').val(), 10);
-      if (val < maxQty) $('#qtyInput').val(val + 1);
-    });
     // --- Fetch product details ---
     async function loadProductDetails() {
       const id = getProductId();
@@ -149,6 +183,7 @@
         if (!data.success) throw new Error('Product not found');
         const p = data.product;
         // Images: support comma-separated or single image
+        // BACKEND: To show multiple images, store image field as comma-separated URLs in DB
         images = p.image ? p.image.split(',').map(s=>s.trim()).filter(Boolean) : [];
         if (!images.length) images = ['/jquery/img/logo.png'];
         currentImgIdx = 0;
@@ -160,6 +195,7 @@
         $('#prodPrice').text('₱' + parseFloat(p.sell_price).toLocaleString());
         maxQty = parseInt(p.stock_quantity || 1);
         $('#qtyAvailable').text(`${maxQty} Piece${maxQty===1?'':'s'} available`);
+        $('#qtyInput').val(1); // Reset quantity to 1 on load
         // Seller info
         $('#sellerInfo').text(p.seller_name ? `Sold by: ${p.seller_name}` : 'Seller info unavailable');
         if (p.seller_profile_image) {
@@ -181,10 +217,38 @@
         // Wishlist
         updateWishlistBtn(p.item_id);
         $('#wishlistBtn').off('click').on('click', function() { toggleWishlist(p.item_id); });
+        // Quantity buttons (move here so maxQty is set)
+        $('#qtyMinus').off('click').on('click', function() {
+          let val = parseInt($('#qtyInput').val(), 10);
+          if (val > 1) $('#qtyInput').val(val - 1);
+        });
+        $('#qtyPlus').off('click').on('click', function() {
+          let val = parseInt($('#qtyInput').val(), 10);
+          if (val < maxQty) {
+            $('#qtyInput').val(val + 1);
+          } else {
+            // Show error popup and highlight
+            $('#qtyInput').addClass('qty-error');
+            setTimeout(()=>$('#qtyInput').removeClass('qty-error'), 600);
+            alert('You cannot add more than the available stock!');
+          }
+        });
+        // Make input editable and validate on input
+        $('#qtyInput').prop('readonly', false).off('input').on('input', function() {
+          let val = parseInt($(this).val(), 10);
+          if (isNaN(val) || val < 1) val = 1;
+          if (val > maxQty) {
+            $('#qtyInput').addClass('qty-error');
+            setTimeout(()=>$('#qtyInput').removeClass('qty-error'), 600);
+            alert('You cannot add more than the available stock!');
+            val = maxQty;
+          }
+          $(this).val(val);
+        });
       } catch (err) {
         $('#prodTitle').text('Product not found');
         $('#desc').text('This product does not exist or could not be loaded.');
-        $('#mainImg').html('<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:2rem;">No Image</div>');
+        $('#carouselImage').attr('src', '/jquery/img/logo.png');
       }
     }
     // --- Add to Cart/Buy Now (stub) ---

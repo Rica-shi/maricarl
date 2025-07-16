@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 10, 2025 at 07:45 AM
+-- Generation Time: Jul 15, 2025 at 11:57 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,32 +18,8 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `homehaven_db`
+-- Database: `homehaven_dbase`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `users`
---
-
-CREATE TABLE `users` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` enum('user','customer','seller','admin') NOT NULL DEFAULT 'user',
-  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
-  `profile_image` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `status`, `profile_image`, `created_at`) VALUES
-(1, 'Admin User', 'admin@homehaven.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'active', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -153,21 +129,29 @@ CREATE TABLE `customer` (
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `customer`
+--
+
+INSERT INTO `customer` (`customer_id`, `user_id`, `fname`, `lname`, `addressline`, `town`, `zipcode`, `phone`, `image_path`, `created_at`) VALUES
+(1, 2, 'Neo', 'Neo', 'taguig city', 'Taguig', '1630', '09611676764', '/uploads/profile_2_1752372198760.png', '2025-07-13 01:16:36');
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sellers`
+-- Table structure for table `email_notifications`
 --
 
-CREATE TABLE `sellers` (
-  `seller_id` int(11) NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `business_name` varchar(255) NOT NULL,
-  `business_description` text DEFAULT NULL,
-  `business_address` text DEFAULT NULL,
-  `business_phone` varchar(16) DEFAULT NULL,
-  `business_email` varchar(255) DEFAULT NULL,
-  `is_verified` tinyint(1) DEFAULT 0,
+CREATE TABLE `email_notifications` (
+  `notification_id` int(11) NOT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `orderinfo_id` int(11) DEFAULT NULL,
+  `email_to` varchar(255) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `type` enum('order_confirmation','order_update','registration','password_reset','other') NOT NULL,
+  `status` enum('pending','sent','failed') DEFAULT 'pending',
+  `sent_at` timestamp NULL DEFAULT NULL,
+  `error_message` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -190,32 +174,12 @@ CREATE TABLE `item` (
   `seller_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `stock`
+-- Dumping data for table `item`
 --
 
-CREATE TABLE `stock` (
-  `item_id` int(11) NOT NULL,
-  `quantity` int(11) DEFAULT 0,
-  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `shopping_cart`
---
-
-CREATE TABLE `shopping_cart` (
-  `cart_id` int(11) NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `item_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL DEFAULT 1,
-  `price` decimal(10,2) NOT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `item` (`item_id`, `category_id`, `name`, `description`, `sku`, `sell_price`, `image`, `status`, `created_at`, `seller_id`) VALUES
+(1, 1, 'Sample Chair', 'A comfortable chair for your home.', 'SKU-CHAIR-001', 999.99, '/uploads/sample-chair.png', 'active', '2025-07-14 19:12:56', 3);
 
 -- --------------------------------------------------------
 
@@ -258,38 +222,6 @@ CREATE TABLE `orderline` (
   `quantity` int(11) NOT NULL,
   `unit_price` decimal(10,2) NOT NULL,
   `total_price` decimal(10,2) NOT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `wishlist`
---
-
-CREATE TABLE `wishlist` (
-  `wishlist_id` int(11) NOT NULL,
-  `customer_id` int(11) NOT NULL,
-  `item_id` int(11) NOT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `email_notifications`
---
-
-CREATE TABLE `email_notifications` (
-  `notification_id` int(11) NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `orderinfo_id` int(11) DEFAULT NULL,
-  `email_to` varchar(255) NOT NULL,
-  `subject` varchar(255) NOT NULL,
-  `type` enum('order_confirmation','order_update','registration','password_reset','other') NOT NULL,
-  `status` enum('pending','sent','failed') DEFAULT 'pending',
-  `sent_at` timestamp NULL DEFAULT NULL,
-  `error_message` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -340,16 +272,108 @@ CREATE TABLE `role_upgrades` (
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sellers`
+--
+
+CREATE TABLE `sellers` (
+  `seller_id` int(11) NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `business_name` varchar(255) NOT NULL,
+  `business_description` text DEFAULT NULL,
+  `business_address` text DEFAULT NULL,
+  `business_phone` varchar(16) DEFAULT NULL,
+  `business_email` varchar(255) DEFAULT NULL,
+  `is_verified` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sellers`
+--
+
+INSERT INTO `sellers` (`seller_id`, `user_id`, `business_name`, `business_description`, `business_address`, `business_phone`, `business_email`, `is_verified`, `created_at`) VALUES
+(1, 3, 'Sample Seller Store', 'We sell home goods.', '123 Main St, City', '09171234567', 'seller1@homehaven.com', 1, '2025-07-14 19:12:56');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shopping_cart`
+--
+
+CREATE TABLE `shopping_cart` (
+  `cart_id` int(11) NOT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `price` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stock`
+--
+
+CREATE TABLE `stock` (
+  `item_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT 0,
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `stock`
+--
+
+INSERT INTO `stock` (`item_id`, `quantity`, `updated_at`) VALUES
+(1, 10, '2025-07-14 19:12:58');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('user','customer','seller','admin') NOT NULL DEFAULT 'user',
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `profile_image` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `status`, `profile_image`, `created_at`) VALUES
+(1, 'Admin User', 'admin@homehaven.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'active', NULL, NULL),
+(2, 'Neo', 'johnbagon4@gmail.com', 'passwOrd&123', 'customer', 'active', NULL, '2025-07-13 01:11:02'),
+(3, 'Sample Seller', 'seller1@homehaven.com', 'password123!', 'seller', 'active', NULL, '2025-07-14 19:12:56'),
+(4, 'test1', 'princenatsu07@gmail.com', 'passwOrd&123', 'user', 'active', NULL, '2025-07-14 19:49:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wishlist`
+--
+
+CREATE TABLE `wishlist` (
+  `wishlist_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_email_unique` (`email`);
 
 --
 -- Indexes for table `activity_logs`
@@ -387,11 +411,12 @@ ALTER TABLE `customer`
   ADD UNIQUE KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `sellers`
+-- Indexes for table `email_notifications`
 --
-ALTER TABLE `sellers`
-  ADD PRIMARY KEY (`seller_id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
+ALTER TABLE `email_notifications`
+  ADD PRIMARY KEY (`notification_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `orderinfo_id` (`orderinfo_id`);
 
 --
 -- Indexes for table `item`
@@ -401,20 +426,6 @@ ALTER TABLE `item`
   ADD UNIQUE KEY `sku` (`sku`),
   ADD KEY `category_id` (`category_id`),
   ADD KEY `seller_id` (`seller_id`);
-
---
--- Indexes for table `stock`
---
-ALTER TABLE `stock`
-  ADD PRIMARY KEY (`item_id`);
-
---
--- Indexes for table `shopping_cart`
---
-ALTER TABLE `shopping_cart`
-  ADD PRIMARY KEY (`cart_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `item_id` (`item_id`);
 
 --
 -- Indexes for table `orderinfo`
@@ -431,23 +442,6 @@ ALTER TABLE `orderline`
   ADD PRIMARY KEY (`orderline_id`),
   ADD KEY `orderinfo_id` (`orderinfo_id`),
   ADD KEY `item_id` (`item_id`);
-
---
--- Indexes for table `wishlist`
---
-ALTER TABLE `wishlist`
-  ADD PRIMARY KEY (`wishlist_id`),
-  ADD UNIQUE KEY `unique_customer_item` (`customer_id`,`item_id`),
-  ADD KEY `customer_id` (`customer_id`),
-  ADD KEY `item_id` (`item_id`);
-
---
--- Indexes for table `email_notifications`
---
-ALTER TABLE `email_notifications`
-  ADD PRIMARY KEY (`notification_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `orderinfo_id` (`orderinfo_id`);
 
 --
 -- Indexes for table `password_reset_tokens`
@@ -472,14 +466,45 @@ ALTER TABLE `role_upgrades`
   ADD KEY `upgraded_by` (`upgraded_by`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- Indexes for table `sellers`
 --
+ALTER TABLE `sellers`
+  ADD PRIMARY KEY (`seller_id`),
+  ADD UNIQUE KEY `user_id` (`user_id`);
 
 --
--- AUTO_INCREMENT for table `users`
+-- Indexes for table `shopping_cart`
+--
+ALTER TABLE `shopping_cart`
+  ADD PRIMARY KEY (`cart_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `item_id` (`item_id`);
+
+--
+-- Indexes for table `stock`
+--
+ALTER TABLE `stock`
+  ADD PRIMARY KEY (`item_id`);
+
+--
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `users_email_unique` (`email`);
+
+--
+-- Indexes for table `wishlist`
+--
+ALTER TABLE `wishlist`
+  ADD PRIMARY KEY (`wishlist_id`),
+  ADD UNIQUE KEY `unique_customer_item` (`customer_id`,`item_id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `item_id` (`item_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
 
 --
 -- AUTO_INCREMENT for table `activity_logs`
@@ -509,25 +534,19 @@ ALTER TABLE `coupons`
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `sellers`
+-- AUTO_INCREMENT for table `email_notifications`
 --
-ALTER TABLE `sellers`
-  MODIFY `seller_id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `email_notifications`
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `shopping_cart`
---
-ALTER TABLE `shopping_cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `orderinfo`
@@ -542,18 +561,6 @@ ALTER TABLE `orderline`
   MODIFY `orderline_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `wishlist`
---
-ALTER TABLE `wishlist`
-  MODIFY `wishlist_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `email_notifications`
---
-ALTER TABLE `email_notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
@@ -564,6 +571,30 @@ ALTER TABLE `personal_access_tokens`
 --
 ALTER TABLE `role_upgrades`
   MODIFY `upgrade_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sellers`
+--
+ALTER TABLE `sellers`
+  MODIFY `seller_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `shopping_cart`
+--
+ALTER TABLE `shopping_cart`
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `wishlist`
+--
+ALTER TABLE `wishlist`
+  MODIFY `wishlist_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -589,10 +620,11 @@ ALTER TABLE `customer`
   ADD CONSTRAINT `customer_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `sellers`
+-- Constraints for table `email_notifications`
 --
-ALTER TABLE `sellers`
-  ADD CONSTRAINT `sellers_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `email_notifications`
+  ADD CONSTRAINT `email_order_fk` FOREIGN KEY (`orderinfo_id`) REFERENCES `orderinfo` (`orderinfo_id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `email_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `item`
@@ -600,19 +632,6 @@ ALTER TABLE `sellers`
 ALTER TABLE `item`
   ADD CONSTRAINT `item_category_fk` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE SET NULL,
   ADD CONSTRAINT `item_seller_fk` FOREIGN KEY (`seller_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `stock`
---
-ALTER TABLE `stock`
-  ADD CONSTRAINT `stock_item_id_fk` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `shopping_cart`
---
-ALTER TABLE `shopping_cart`
-  ADD CONSTRAINT `cart_item_fk` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `cart_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `orderinfo`
@@ -628,25 +647,37 @@ ALTER TABLE `orderline`
   ADD CONSTRAINT `orderline_orderinfo_id_fk` FOREIGN KEY (`orderinfo_id`) REFERENCES `orderinfo` (`orderinfo_id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `role_upgrades`
+--
+ALTER TABLE `role_upgrades`
+  ADD CONSTRAINT `role_upgrades_upgraded_by_fk` FOREIGN KEY (`upgraded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `role_upgrades_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `sellers`
+--
+ALTER TABLE `sellers`
+  ADD CONSTRAINT `sellers_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `shopping_cart`
+--
+ALTER TABLE `shopping_cart`
+  ADD CONSTRAINT `cart_item_fk` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cart_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stock`
+--
+ALTER TABLE `stock`
+  ADD CONSTRAINT `stock_item_id_fk` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `wishlist`
 --
 ALTER TABLE `wishlist`
   ADD CONSTRAINT `wishlist_customer_fk` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `wishlist_item_fk` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `email_notifications`
---
-ALTER TABLE `email_notifications`
-  ADD CONSTRAINT `email_order_fk` FOREIGN KEY (`orderinfo_id`) REFERENCES `orderinfo` (`orderinfo_id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `email_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `role_upgrades`
---
-ALTER TABLE `role_upgrades`
-  ADD CONSTRAINT `role_upgrades_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `role_upgrades_upgraded_by_fk` FOREIGN KEY (`upgraded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
