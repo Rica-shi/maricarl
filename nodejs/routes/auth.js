@@ -366,4 +366,5 @@ router.get('/admin/stats', authenticateJWT, async (req, res) => {
   }
 });
 
-module.exports = router; 
+module.exports = router;
+module.exports.authenticateJWT = authenticateJWT; 

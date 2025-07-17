@@ -9,6 +9,7 @@ const testDB = require('./routes/test-db');
 const itemRoutes = require('./routes/item');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const sellerRoutes = require('./routes/seller');
 
 // ✅ Middleware
 app.use(cors({
@@ -22,6 +23,7 @@ app.use('/api/v1', testDB);
 app.use('/api/v1', itemRoutes);
 app.use('/api/v1', authRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1', sellerRoutes);
 
 // Serve uploads folder for profile images and other uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
