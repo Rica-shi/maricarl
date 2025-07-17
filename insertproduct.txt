@@ -1,0 +1,49 @@
+-- Living Room Category (category_id = 1)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(1, 1, 'Coffee Table', 'Modern coffee table for living room', 'CT001', 5000.00, '/jquery/img/Living Room/Coffee Table/CoffeeTable1.jpg', 'active', NOW(), 1),
+(2, 1, 'Sofa Deluxe', 'Comfortable deluxe sofa', 'SD001', 7599.99, '/jquery/img/Living Room/Sofa Deluxe/SofaDeluxe1.jpg', 'active', NOW(), 1);
+
+-- Bedroom Category (category_id = 2)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(3, 2, 'Nightstand', 'Wooden bedside nightstand', 'NS001', 3500.00, '/jquery/img/Bedroom/Nightstand/Nightstand1.jpg', 'active', NOW(), 1),
+(4, 2, 'Queen Bed', 'Comfortable queen size bed', 'QB001', 12599.99, '/jquery/img/Bedroom/Queen Bed/QueenBed1.jpg', 'active', NOW(), 1);
+
+-- Kitchen & Dining Category (category_id = 3)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(5, 3, 'Bar Stool', 'Adjustable height bar stool', 'BS001', 3500.00, '/jquery/img/Kitchen & Dining/Bar Stool/BarStool1.jpg', 'active', NOW(), 1),
+(6, 3, 'Dining Set', '4-piece dining table set', 'DS001', 10000.00, '/jquery/img/Kitchen & Dining/Dining Set/DiningSet1.jpg', 'active', NOW(), 1);
+
+-- Bathroom Category (category_id = 4)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(7, 4, 'Bath Mat', 'Soft absorbent bath mat', 'BM001', 1599.99, '/jquery/img/Bathroom/Bath Mat/BathMat1.jpg', 'active', NOW(), 1),
+(8, 4, 'Shower Curtain', 'Waterproof shower curtain', 'SC001', 999.99, '/jquery/img/Bathroom/Shower Curtains/ShowerCurtain1.jpg', 'active', NOW(), 1);
+
+-- Office Category (category_id = 5)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(9, 5, 'Desk Organizer', 'Multi-compartment desk organizer', 'DO001', 500.00, '/jquery/img/Office/Desk Organizer/DeskOrganizer1.jpg', 'active', NOW(), 1),
+(10, 5, 'Office Chair', 'Ergonomic office chair', 'OC001', 2500.00, '/jquery/img/Office/Office Chair/OfficeChair1.jpg', 'active', NOW(), 1);
+
+-- Outdoor Category (category_id = 6)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(11, 6, 'Garden Lamp', 'Solar powered garden lamp', 'GL001', 1299.99, '/jquery/img/Outdoor/Garden Lamp/GardenLamp1.jpg', 'active', NOW(), 1),
+(12, 6, 'Patio Set', 'Outdoor patio furniture set', 'PS001', 499999.99, '/jquery/img/Outdoor/Patio Set/PatioSet1.jpg', 'active', NOW(), 1);
+
+-- Lighting Category (category_id = 7)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(13, 7, 'Pendant Light', 'Modern pendant light fixture', 'PL001', 3000.00, '/jquery/img/Lighting/Pendant Light/PendantLight1.jpg', 'active', NOW(), 1),
+(14, 7, 'Table Lamp', 'Adjustable table lamp', 'TL001', 1800.00, '/jquery/img/Lighting/Table Lamp/TableLamp1.jpg', 'active', NOW(), 1);
+
+-- Storage Category (category_id = 8)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(15, 8, 'Bookshelf', '5-tier wooden bookshelf', 'BSF001', 6000.00, '/jquery/img/Storage/Bookshelf/Bookshelf1.jpg', 'active', NOW(), 1),
+(16, 8, 'Storage Box', 'Collapsible storage box', 'SB001', 800.00, '/jquery/img/Storage/Storage Box/StorageBox1.jpg', 'active', NOW(), 1);
+
+-- Wall Art Category (category_id = 9)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(17, 9, 'Canvas Art', 'Abstract canvas wall art', 'CA001', 2500.00, '/jquery/img/Wall Art/Canvas Art/CanvasArt1.jpg', 'active', NOW(), 1),
+(18, 9, 'Wall Clock', 'Modern wall clock design', 'WC001', 1400.00, '/jquery/img/Wall Art/Wall Clock/WallClock1.jpg', 'active', NOW(), 1);
+
+-- Seasonal Category (category_id = 10)
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(19, 10, 'Christmas Tree', 'Artificial Christmas tree', 'CT002', 5500.00, '/jquery/img/Seasonal/Christmas Tree/ChristmasTree1.jpg', 'active', NOW(), 1),
+(20, 10, 'Pumpkin Decor', 'Halloween pumpkin decoration', 'PD001', 75.00, '/jquery/img/Seasonal/Pumpkin Decor/PumpkinDecor1.jpg', 'active', NOW(), 1);

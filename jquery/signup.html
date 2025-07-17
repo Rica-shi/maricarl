@@ -218,6 +218,74 @@
       letter-spacing: 0.5px;
       z-index: 3;
     }
+    .custom-header {
+      width: 100vw;
+      background: rgba(255,255,255,0.85);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .custom-header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 2vw;
+    }
+    .header-logo-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .header-logo {
+      height: 40px;
+      width: 40px;
+      object-fit: contain;
+      margin-right: 0.7rem;
+    }
+    .header-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #8B5C2A;
+      text-decoration: none;
+      margin-right: auto;
+      letter-spacing: 1px;
+    }
+    .header-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .header-link {
+      font-size: 1.1rem;
+      color: #8B5C2A;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-link:hover {
+      color: #6d4c1c;
+    }
+    @media (max-width: 600px) {
+      .custom-header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.7rem 1vw;
+      }
+      .header-links {
+        gap: 1rem;
+        margin-top: 0.5rem;
+      }
+      .header-title {
+        font-size: 1.2rem;
+      }
+      .header-logo {
+        height: 32px;
+        width: 32px;
+      }
+    }
     @media (max-width: 900px) {
       .container {
         flex-direction: column;
@@ -248,6 +316,16 @@
     window.location.href = 'index.html';
   }
 </script>
+  <div class="custom-header">
+    <div class="custom-header-inner">
+      <a href="index.html" class="header-logo-link"><img src="img/logo.png" alt="Home Haven Logo" class="header-logo"></a>
+      <a href="index.html" class="header-title">HomeHaven</a>
+      <div class="header-links">
+        <a href="login.html" class="header-link">Login</a>
+        <a href="product_catalog.html" class="header-link">Products</a>
+      </div>
+    </div>
+  </div>
   <div class="bg-overlay"></div>
   <div class="container">
     <div class="left">

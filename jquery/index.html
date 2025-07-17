@@ -20,38 +20,77 @@
       background: #f7f4f0;
       color: #444;
     }
-    header {
+    .custom-header {
+      width: 100%;
+      background: rgba(255,255,255,0.85);
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .custom-header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 40px 60px 0 60px;
-      background: #f7f4f0;
+      justify-content: space-between;
+      padding: 0.5rem 2vw;
     }
-    .logo {
-      font-size: 3rem;
-      font-weight: 500;
-      color: #444;
-      letter-spacing: 2px;
-    }
-    nav {
+    .header-logo-link {
       display: flex;
-      gap: 36px;
-    }
-    nav a {
+      align-items: center;
       text-decoration: none;
-      color: #7b8577;
-      font-size: 1.4rem;
-      font-family: 'Georgia', serif;
+    }
+    .header-logo {
+      height: 40px;
+      width: 40px;
+      object-fit: contain;
+      margin-right: 0.7rem;
+    }
+    .header-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #8B5C2A;
+      text-decoration: none;
+      margin-right: auto;
+      letter-spacing: 1px;
+    }
+    .header-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .header-link {
+      font-size: 1.1rem;
+      color: #8B5C2A;
+      text-decoration: none;
+      font-weight: 500;
       transition: color 0.2s;
     }
-    nav a:hover {
-      color: #b89c7a;
+    .header-link:hover {
+      color: #6d4c1c;
+    }
+    @media (max-width: 600px) {
+      .custom-header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.7rem 1vw;
+      }
+      .header-links {
+        gap: 1rem;
+        margin-top: 0.5rem;
+      }
+      .header-title {
+        font-size: 1.2rem;
+      }
+      .header-logo {
+        height: 32px;
+        width: 32px;
+      }
     }
     .hero {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 40px 60px 0 60px;
+      padding: 40px 60px 40px 60px;
       background: #f7f4f0;
       /* Add the background image here: */
       background-image: url('img/homehavenbg.png');
@@ -258,6 +297,10 @@
 </head>
 <body>
 <script src="js/main.js"></script>
+
+<!-- Header Container - will be populated based on authentication status -->
+<div id="header-container"></div>
+
   <section class="hero">
     <div class="hero-art">
       <img src="img/homehavenbg.png" alt="Framed Art" class="framed-art"/>
@@ -278,6 +321,61 @@
     </div>
   </section>
   <script>
+    // Function to load the appropriate header based on authentication status
+    function loadHeader() {
+      const token = localStorage.getItem('jwt_token');
+      const headerContainer = document.getElementById('header-container');
+      
+      // Check if token exists and is valid
+      if (token && token.trim() !== '') {
+        // User is logged in - load header.html
+        fetch('header.html')
+          .then(response => response.text())
+          .then(html => {
+            headerContainer.innerHTML = html;
+            // Execute any scripts in the header
+            const scripts = headerContainer.querySelectorAll('script');
+            scripts.forEach(script => {
+              if (script.src) {
+                // External script
+                const newScript = document.createElement('script');
+                newScript.src = script.src;
+                document.head.appendChild(newScript);
+              } else {
+                // Inline script
+                eval(script.innerHTML);
+              }
+            });
+          })
+          .catch(error => {
+            console.error('Error loading header:', error);
+            // Fallback to custom header
+            loadCustomHeader();
+          });
+      } else {
+        // User is not logged in - use custom header
+        loadCustomHeader();
+      }
+    }
+
+    // Function to load custom header (similar to login.html)
+    function loadCustomHeader() {
+      const headerContainer = document.getElementById('header-container');
+      headerContainer.innerHTML = `
+        <div class="custom-header">
+          <div class="custom-header-inner">
+            <a href="index.html" class="header-logo-link"><img src="img/logo.png" alt="Home Haven Logo" class="header-logo"></a>
+            <a href="index.html" class="header-title">HomeHaven</a>
+            <div class="header-links">
+              <a href="login.html" class="header-link">Login</a>
+              <a href="signup.html" class="header-link">Sign Up</a>
+              <a href="product_catalog.html" class="header-link">Products</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     // Load featured products
     function loadFeaturedProducts() {
       const productList = document.getElementById('product-list');
@@ -356,8 +454,23 @@
       alert(`Viewing product ${itemId}. Product detail page will be implemented next!`);
     }
 
+    // Function to validate and clean up authentication
+    function validateAuth() {
+      const token = localStorage.getItem('jwt_token');
+      const userRole = localStorage.getItem('user_role');
+      
+      // Clear invalid tokens
+      if (token === 'null' || token === 'undefined' || token === '') {
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_name');
+      }
+    }
+
     // Load products when page loads
     document.addEventListener('DOMContentLoaded', function() {
+      validateAuth(); // Clean up any invalid tokens first
+      loadHeader();
       loadFeaturedProducts();
     });
   </script>

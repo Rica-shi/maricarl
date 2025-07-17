@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Details - Home Haven</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <style>
+    body { background: #f7f4f0; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .details-container { max-width: 1100px; margin: 18px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 18px 8px; display: flex; gap: 24px; }
+    .details-left { flex: 1.1; display: flex; flex-direction: column; align-items: center; }
+    .carousel-main-img { width: 260px; height: 260px; border-radius: 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; background: #eee; overflow: hidden; position: relative; }
+    .carousel-main-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+    .carousel-thumbs { display: flex; gap: 6px; margin-bottom: 8px; }
+    .carousel-thumb { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; background: #f0f0f0; }
+    .carousel-thumb.selected { border-color: #8B5C2A; }
+    .carousel-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+    .details-desc { margin-top: 10px; color: #444; font-size: 0.98rem; text-align: center; }
+    .details-right { flex: 1.5; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
+    .details-title-row { display: flex; align-items: flex-start; gap: 0.7em; width: 100%; }
+    .details-title { font-size: 1.25rem; font-weight: 700; color: #444; margin-bottom: 0.2em; text-align: left; flex: 1; word-break: break-word; }
+    .details-wishlist { margin-left: 0.5em; font-size: 1.5rem; color: #e74c3c; background: none; border: none; cursor: pointer; position: absolute; top: 0; right: 0; z-index: 2; transition: color 0.2s; }
+    .details-wishlist:hover { color: #c0392b; }
+    .details-meta-row { display: flex; align-items: center; gap: 1em; margin-bottom: 0.5em; flex-wrap: wrap; }
+    .details-category { color: #8B5C2A; font-size: 0.95rem; font-weight: 600; background: #f3ede5; border-radius: 8px; padding: 2px 10px; }
+    .details-rating { color: #ffe066; font-size: 1.1rem; }
+    .details-rating-num { color: #444; font-size: 0.98rem; margin-left: 0.3em; }
+    .details-rating-meta { color: #888; font-size: 0.95rem; border-left: 2px solid #e0d6c6; padding-left: 0.7em; margin-left: 0.7em; }
+    .details-price { font-size: 1.18rem; font-weight: 700; color: #444; margin-bottom: 0.5em; }
+    .details-qty-row { display: flex; align-items: center; gap: 0.7em; margin-bottom: 0.8em; }
+    .details-qty-label { font-size: 0.98rem; color: #444; }
+    .details-qtybox { display: flex; align-items: center; background: #fff; border: 1.2px solid #bfa77a; border-radius: 6px; padding: 1px 7px; gap: 0.2em; }
+    .details-qtybox button { background: none; border: none; font-size: 1.1rem; width: 1.5em; height: 1.5em; cursor: pointer; color: #8B5C2A; padding: 0; }
+    .details-qtybox input { width: 2em; text-align: center; font-size: 0.98rem; border: none; background: transparent; border-radius: 0; padding: 0; }
+    .details-qty-available { color: #888; font-size: 0.95rem; margin-left: 0.5em; }
+    .details-actions { display: flex; gap: 0.7em; margin-bottom: 1em; }
+    .details-actions button { background: #bfa77a; color: #fff; border: none; border-radius: 7px; padding: 0.6em 1.5em; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.07); transition: background 0.2s; }
+    .details-actions button:hover { background: #8B5C2A; }
+    .details-seller { background: #e7d6bb; border-radius: 18px; padding: 0.8em 1.2em; display: flex; align-items: center; gap: 0.8em; margin-top: 1.2em; width: 100%; max-width: 100%; box-sizing: border-box; }
+    .details-seller-img { width: 44px; height: 44px; border-radius: 50%; background: #7a5430; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .details-seller-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .details-seller-info { font-size: 1.05rem; font-weight: 600; color: #444; }
+    @media (max-width: 900px) {
+      .details-container { flex-direction: column; padding: 10px 2vw; gap: 10px; }
+      .details-left, .details-right { width: 100%; }
+      .details-right { align-items: flex-start; }
+      .details-seller { flex-direction: column; text-align: center; }
+    }
+    .details-rating i.fas.fa-star { color: #ffe066; }
+    .details-rating i.far.fa-star { color: #ddd; }
+    .qty-error { border: 2px solid #e74c3c !important; box-shadow: 0 0 6px #e74c3c; }
+    .carousel-nav-btn {
+      transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
+      opacity: 0.7;
+    }
+    .carousel-nav-btn:hover {
+      background: #8B5C2A;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      opacity: 1.0;
+    }
+    .custom-header {
+      width: 100vw;
+      background: rgba(255,255,255,0.85);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .custom-header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 2vw;
+    }
+    .header-logo-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .header-logo {
+      height: 40px;
+      width: 40px;
+      object-fit: contain;
+      margin-right: 0.7rem;
+    }
+    .header-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #8B5C2A;
+      text-decoration: none;
+      margin-right: auto;
+      letter-spacing: 1px;
+    }
+    .header-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .header-link {
+      font-size: 1.1rem;
+      color: #8B5C2A;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-link:hover {
+      color: #6d4c1c;
+    }
+    @media (max-width: 600px) {
+      .custom-header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.7rem 1vw;
+      }
+      .header-links {
+        gap: 1rem;
+        margin-top: 0.5rem;
+      }
+      .header-title {
+        font-size: 1.2rem;
+      }
+      .header-logo {
+        height: 32px;
+        width: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-header">
+    <div class="custom-header-inner">
+      <a href="index.html" class="header-logo-link"><img src="img/logo.png" alt="Home Haven Logo" class="header-logo"></a>
+      <a href="index.html" class="header-title">HomeHaven</a>
+      <div class="header-links">
+        <a href="login.html" class="header-link">Login</a>
+        <a href="product_catalog.html" class="header-link">Products</a>
+      </div>
+    </div>
+  </div>
+  <div style="height:64px;"></div>
+  <div class="details-container">
+    <div class="details-left">
+      <div class="carousel-main-img" id="mainImg" style="position:relative;">
+        <button id="carouselPrev" class="carousel-nav-btn" style="position:absolute;left:0;top:50%;transform:translateY(-50%);background:#8B5C2A;color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:1.3rem;cursor:pointer;z-index:2;">
+          <span style="font-size:1.5rem;">&#8592;</span>
+        </button>
+        <img id="carouselImage" src="/jquery/img/logo.png" alt="Product Image" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">
+        <button id="carouselNext" class="carousel-nav-btn" style="position:absolute;right:0;top:50%;transform:translateY(-50%);background:#8B5C2A;color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:1.3rem;cursor:pointer;z-index:2;">
+          <span style="font-size:1.5rem;">&#8594;</span>
+        </button>
+      </div>
+      <div class="carousel-thumbs" id="thumbsRow" style="justify-content:center;"></div>
+      <div class="details-desc" id="desc">Loading description...</div>
+    </div>
+    <div class="details-right">
+      <div class="details-title-row">
+        <div class="details-title" id="prodTitle">Loading...</div>
+        <button class="details-wishlist" id="wishlistBtn" title="Add to Wishlist"><i class="far fa-heart"></i></button>
+      </div>
+      <div class="details-meta-row">
+        <span class="details-category" id="prodCategory">Category</span>
+        <span class="details-rating" id="prodStars">★★★★★</span>
+        <span class="details-rating-num" id="prodRating">5.0</span>
+        <span class="details-rating-meta" id="prodRatingsCount">0 Ratings</span>
+        <span class="details-rating-meta" id="prodSold">0 Sold</span>
+      </div>
+      <div class="details-price" id="prodPrice">₱0.00</div>
+      <div class="details-qty-row">
+        <span class="details-qty-label">Quantity</span>
+        <div class="details-qtybox">
+          <button id="qtyMinus">-</button>
+          <input type="text" id="qtyInput" value="1" readonly>
+          <button id="qtyPlus">+</button>
+        </div>
+        <span class="details-qty-available" id="qtyAvailable">0 Pieces available</span>
+      </div>
+      <div class="details-actions">
+        <button id="addToCartBtn">Add to Cart</button>
+        <button id="buyNowBtn">Buy Now</button>
+      </div>
+      <div class="details-seller">
+        <div class="details-seller-img" id="sellerImg"></div>
+        <div class="details-seller-info" id="sellerInfo">Loading seller info...</div>
+      </div>
+    </div>
+  </div>
+  <div id="wishlistNotify" style="display:none;position:fixed;top:30px;left:50%;transform:translateX(-50%);background:#8B5C2A;color:#fff;padding:12px 28px;border-radius:8px;font-size:1.05rem;z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,0.13);transition:opacity 0.2s;"></div>
+  <script>
+    // --- Helper: Get product ID from URL ---
+    function getProductId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+    // --- Wishlist logic (localStorage) ---
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    function updateWishlistBtn(productId) {
+      const isWishlisted = wishlist.includes(productId);
+      $('#wishlistBtn i').toggleClass('fas', isWishlisted).toggleClass('far', !isWishlisted);
+      $('#wishlistBtn').attr('title', isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist');
+    }
+    function showWishlistNotify(added) {
+      const msg = added ? 'Added to wishlist!' : 'Removed from wishlist.';
+      $('#wishlistNotify').text(msg).css({display:'block',opacity:1});
+      setTimeout(()=>{
+        $('#wishlistNotify').fadeOut(400);
+      }, 1200);
+    }
+    function toggleWishlist(productId) {
+      const idx = wishlist.indexOf(productId);
+      let added = false;
+      if (idx > -1) {
+        wishlist.splice(idx, 1);
+        added = false;
+      } else {
+        wishlist.push(productId);
+        added = true;
+      }
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+      updateWishlistBtn(productId);
+      showWishlistNotify(added);
+    }
+    // --- Carousel logic ---
+    let images = [];
+    let currentImgIdx = 0;
+    function renderCarousel() {
+      // Main image
+      const mainImg = images[currentImgIdx] || '';
+      $('#carouselImage').attr('src', mainImg ? mainImg : '/jquery/img/logo.png');
+      // Thumbnails
+      let thumbsHtml = '';
+      images.forEach((img, idx) => {
+        thumbsHtml += `<div class="carousel-thumb${idx===currentImgIdx?' selected':''}" data-idx="${idx}"><img src="${img}" alt="Thumb" onerror="this.src='/jquery/img/logo.png'"></div>`;
+      });
+      $('#thumbsRow').html(thumbsHtml);
+    }
+    // Carousel arrow events
+    $(document).on('click', '#carouselPrev', function() {
+      currentImgIdx = (currentImgIdx - 1 + images.length) % images.length;
+      renderCarousel();
+    });
+    $(document).on('click', '#carouselNext', function() {
+      currentImgIdx = (currentImgIdx + 1) % images.length;
+      renderCarousel();
+    });
+    $(document).on('click', '.carousel-thumb', function() {
+      currentImgIdx = parseInt($(this).data('idx'));
+      renderCarousel();
+    });
+    // --- Quantity logic ---
+    let maxQty = 1;
+    // --- Fetch product details ---
+    async function loadProductDetails() {
+      const id = getProductId();
+      if (!id) return;
+      try {
+        const res = await fetch(`http://localhost:4000/api/v1/products/${id}`);
+        const data = await res.json();
+        if (!data.success) throw new Error('Product not found');
+        const p = data.product;
+        // Images: support comma-separated or single image
+        // BACKEND: To show multiple images, store image field as comma-separated URLs in DB
+        images = p.image ? p.image.split(',').map(s=>s.trim()).filter(Boolean) : [];
+        if (!images.length) images = ['/jquery/img/logo.png'];
+        currentImgIdx = 0;
+        renderCarousel();
+        // Title, desc, price, etc
+        $('#prodTitle').text(p.name);
+        $('#desc').text(p.description);
+        $('#prodCategory').text(p.category_name || 'Uncategorized');
+        $('#prodPrice').text('₱' + parseFloat(p.sell_price).toLocaleString());
+        maxQty = parseInt(p.stock_quantity || 1);
+        $('#qtyAvailable').text(`${maxQty} Piece${maxQty===1?'':'s'} available`);
+        $('#qtyInput').val(1); // Reset quantity to 1 on load
+        // Seller info
+        $('#sellerInfo').text(p.seller_name ? `Sold by: ${p.seller_name}` : 'Seller info unavailable');
+        if (p.seller_profile_image) {
+          $('#sellerImg').html(`<img src="${p.seller_profile_image}" alt="Seller" onerror="this.src='/jquery/img/logo.png'">`);
+        } else {
+          $('#sellerImg').html('<i class="fas fa-user" style="font-size:1.5rem;color:#fff;"></i>');
+        }
+        // Sold count
+        $('#prodSold').text(`${p.sold_count || 0} Sold`);
+        // Ratings
+        const rating = typeof p.rating === 'number' ? p.rating : 5.0;
+        const ratingsCount = typeof p.ratings_count === 'number' ? p.ratings_count : 0;
+        $('#prodRating').text(rating.toFixed(1));
+        $('#prodRatingsCount').text(`${ratingsCount} Rating${ratingsCount===1?'':'s'}`);
+        // Stars
+        let stars = '';
+        for (let i = 1; i <= 5; i++) stars += `<i class="fa${i <= Math.round(rating) ? 's' : 'r'} fa-star"></i>`;
+        $('#prodStars').html(stars);
+        // Wishlist
+        updateWishlistBtn(p.item_id);
+        $('#wishlistBtn').off('click').on('click', function() { toggleWishlist(p.item_id); });
+        // Quantity buttons (move here so maxQty is set)
+        $('#qtyMinus').off('click').on('click', function() {
+          let val = parseInt($('#qtyInput').val(), 10);
+          if (val > 1) $('#qtyInput').val(val - 1);
+        });
+        $('#qtyPlus').off('click').on('click', function() {
+          let val = parseInt($('#qtyInput').val(), 10);
+          if (val < maxQty) {
+            $('#qtyInput').val(val + 1);
+          } else {
+            // Show error popup and highlight
+            $('#qtyInput').addClass('qty-error');
+            setTimeout(()=>$('#qtyInput').removeClass('qty-error'), 600);
+            alert('You cannot add more than the available stock!');
+          }
+        });
+        // Make input editable and validate on input
+        $('#qtyInput').prop('readonly', false).off('input').on('input', function() {
+          let val = parseInt($(this).val(), 10);
+          if (isNaN(val) || val < 1) val = 1;
+          if (val > maxQty) {
+            $('#qtyInput').addClass('qty-error');
+            setTimeout(()=>$('#qtyInput').removeClass('qty-error'), 600);
+            alert('You cannot add more than the available stock!');
+            val = maxQty;
+          }
+          $(this).val(val);
+        });
+      } catch (err) {
+        $('#prodTitle').text('Product not found');
+        $('#desc').text('This product does not exist or could not be loaded.');
+        $('#carouselImage').attr('src', '/jquery/img/logo.png');
+      }
+    }
+    // --- Add to Cart/Buy Now (stub) ---
+    $('#addToCartBtn').click(function() { alert('Added to cart!'); });
+    $('#buyNowBtn').click(function() { alert('Proceed to checkout!'); });
+    // --- On page load ---
+    $(document).ready(function() {
+      loadProductDetails();
+    });
+  </script>
+</body>
+</html> 

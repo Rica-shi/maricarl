@@ -4,6 +4,9 @@ function injectHeader() {
   const path = window.location.pathname;
   if (path.includes('login.html') || path.includes('signup.html')) return;
 
+  // Don't inject header on index.html - it has its own header logic
+  if (path.includes('index.html') || path.endsWith('/') || path === '') return;
+
   fetch('header.html')
     .then(res => res.text())
     .then(html => {

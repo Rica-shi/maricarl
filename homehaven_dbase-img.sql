@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 15, 2025 at 11:57 AM
+-- Generation Time: Jul 17, 2025 at 08:55 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -178,8 +178,27 @@ CREATE TABLE `item` (
 -- Dumping data for table `item`
 --
 
-INSERT INTO `item` (`item_id`, `category_id`, `name`, `description`, `sku`, `sell_price`, `image`, `status`, `created_at`, `seller_id`) VALUES
-(1, 1, 'Sample Chair', 'A comfortable chair for your home.', 'SKU-CHAIR-001', 999.99, '/uploads/sample-chair.png', 'active', '2025-07-14 19:12:56', 3);
+INSERT INTO item (item_id, category_id, name, description, sku, sell_price, image, status, created_at, seller_id) VALUES
+(1, 1, 'Coffee Table', 'Modern coffee table for living room', 'SKU-LVR-002', 649.99, '/jquery/img/Living Room/Coffee Table/CoffeeTable1.jpg, /jquery/img/Living Room/Coffee Table/CoffeeTable2.jpg, /jquery/img/Living Room/Coffee Table/CoffeeTable3.jpg, /jquery/img/Living Room/Coffee Table/CoffeeTable4.jpg, /jquery/img/Living Room/Coffee Table/CoffeeTable5.jpg', 1, NOW(), 1),
+(2, 1, 'Sofa Deluxe', 'Comfortable deluxe sofa', 'SKU-LVR-003', 8999.00, '/jquery/img/Living Room/Sofa Deluxe/SofaDeluxe1.jpg, /jquery/img/Living Room/Sofa Deluxe/SofaDeluxe2.jpg, /jquery/img/Living Room/Sofa Deluxe/SofaDeluxe3.jpg, /jquery/img/Living Room/Sofa Deluxe/SofaDeluxe4.jpg, /jquery/img/Living Room/Sofa Deluxe/SofaDeluxe5.jpg', 1, NOW(), 1),
+(3, 2, 'Nightstand', 'Wooden bedside nightstand', 'SKU-BED-001', 3500.00, '/jquery/img/Bedroom/Nightstand/Nightstand1.jpg, /jquery/img/Bedroom/Nightstand/Nightstand2.jpg, /jquery/img/Bedroom/Nightstand/Nightstand3.jpg, /jquery/img/Bedroom/Nightstand/Nightstand4.jpg, /jquery/img/Bedroom/Nightstand/Nightstand5.jpg', 'active', '2025-07-17 06:52:00', 1),
+(4, 2, 'Queen Bed', 'Comfortable queen size bed', 'SKU-BED-002', 12599.99, '/jquery/img/Bedroom/Queen Bed/QueenBed1.jpg, /jquery/img/Bedroom/Queen Bed/QueenBed2.jpg, /jquery/img/Bedroom/Queen Bed/QueenBed3.jpg, /jquery/img/Bedroom/Queen Bed/QueenBed4.jpg, /jquery/img/Bedroom/Queen Bed/QueenBed5.jpg', 'active', '2025-07-17 06:52:00', 1),
+(5, 3, 'Bar Stool', 'Adjustable height bar stool', 'SKU-KTD-001', 3500.00, '/jquery/img/Kitchen & Dining/Bar Stool/BarStool1.jpg, /jquery/img/Kitchen & Dining/Bar Stool/BarStool2.jpg, /jquery/img/Kitchen & Dining/Bar Stool/BarStool3.jpg, /jquery/img/Kitchen & Dining/Bar Stool/BarStool4.jpg, /jquery/img/Kitchen & Dining/Bar Stool/BarStool5.jpg', 'active', '2025-07-17 06:52:00', 1),
+(6, 3, 'Dining Set', '4-piece dining table set', 'SKU-KTD-002', 10000.00, '/jquery/img/Kitchen & Dining/Dining Set/DiningSet1.jpg, /jquery/img/Kitchen & Dining/Dining Set/DiningSet2.jpg, /jquery/img/Kitchen & Dining/Dining Set/DiningSet3.jpg, /jquery/img/Kitchen & Dining/Dining Set/DiningSet4.jpg, /jquery/img/Kitchen & Dining/Dining Set/DiningSet5.jpg', 'active', '2025-07-17 06:52:00', 1),
+(7, 4, 'Bath Mat', 'Soft absorbent bath mat', 'SKU-BTH-001', 1599.99, '/jquery/img/Bathroom/Bath Mat/BathMat1.jpg, /jquery/img/Bathroom/Bath Mat/BathMat2.jpg, /jquery/img/Bathroom/Bath Mat/BathMat3.jpg, /jquery/img/Bathroom/Bath Mat/BathMat4.jpg, /jquery/img/Bathroom/Bath Mat/BathMat5.jpg', 'active', '2025-07-17 06:52:00', 1),
+(8, 4, 'Shower Curtain', 'Waterproof shower curtain', 'SKU-BTH-002', 999.99, '/jquery/img/Bathroom/Shower Curtains/ShowerCurtain1.jpg, /jquery/img/Bathroom/Shower Curtains/ShowerCurtain2.jpg, /jquery/img/Bathroom/Shower Curtains/ShowerCurtain3.jpg, /jquery/img/Bathroom/Shower Curtains/ShowerCurtain4.jpg, /jquery/img/Bathroom/Shower Curtains/ShowerCurtain5.jpg', 'active', '2025-07-17 06:52:00', 1),
+(9, 5, 'Desk Organizer', 'Multi-compartment desk organizer', 'SKU-OFF-001', 500.00, '/jquery/img/Office/Desk Organizer/DeskOrganizer1.jpg, /jquery/img/Office/Desk Organizer/DeskOrganizer2.jpg, /jquery/img/Office/Desk Organizer/DeskOrganizer3.jpg, /jquery/img/Office/Desk Organizer/DeskOrganizer4.jpg, /jquery/img/Office/Desk Organizer/DeskOrganizer5.jpg', 'active', '2025-07-17 06:52:00', 1),
+(10, 5, 'Office Chair', 'Ergonomic office chair', 'SKU-OFF-002', 2500.00, '/jquery/img/Office/Office Chair/OfficeChair1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(11, 6, 'Garden Lamp', 'Solar powered garden lamp', 'SKU-OTD-001', 1299.99, '/jquery/img/Outdoor/Garden Lamp/GardenLamp1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(12, 6, 'Patio Set', 'Outdoor patio furniture set', 'SKU-OTD-002', 499999.99, '/jquery/img/Outdoor/Patio Set/PatioSet1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(13, 7, 'Pendant Light', 'Modern pendant light fixture', 'SKU-LGT-001', 3000.00, '/jquery/img/Lighting/Pendant Light/PendantLight1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(14, 7, 'Table Lamp', 'Adjustable table lamp', 'SKU-LGT-002', 1800.00, '/jquery/img/Lighting/Table Lamp/TableLamp1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(15, 8, 'Bookshelf', '5-tier wooden bookshelf', 'SKU-STR-001', 6000.00, '/jquery/img/Storage/Bookshelf/Bookshelf1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(16, 8, 'Storage Box', 'Collapsible storage box', 'SKU-STR-002', 800.00, '/jquery/img/Storage/Storage Box/StorageBox1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(17, 9, 'Canvas Art', 'Abstract canvas wall art', 'SKU-WAT-001', 2500.00, '/jquery/img/Wall Art/Canvas Art/CanvasArt1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(18, 9, 'Wall Clock', 'Modern wall clock design', 'SKU-WAT-002', 1400.00, '/jquery/img/Wall Art/Wall Clock/WallClock1.jpg', 'active', '2025-07-17 06:52:00', 1),
+(19, 10, 'Christmas Tree', 'Artificial Christmas tree', 'SKU-SEA-001', 5500.00, '/jquery/img/Seasonal/Christmas Tree/ChristmasTree1.jpg', 'active', '2025-07-17 06:52:02', 1),
+(20, 10, 'Pumpkin Decor', 'Halloween pumpkin decoration', 'SKU-SEA-002', 75.00, '/jquery/img/Seasonal/Pumpkin Decor/PumpkinDecor1.jpg', 'active', '2025-07-17 06:52:02', 1);
 
 -- --------------------------------------------------------
 
@@ -546,7 +565,7 @@ ALTER TABLE `email_notifications`
 -- AUTO_INCREMENT for table `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `orderinfo`
