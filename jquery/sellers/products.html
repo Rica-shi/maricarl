@@ -3,34 +3,249 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seller Product Management</title>
+  <title>Product Management</title>
   <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    .hero-section {
-      background: linear-gradient(135deg, #8B5C2A 0%, #A67C52 100%);
-      color: white;
-      padding: 28px 12px;
-      border-radius: 12px;
-      text-align: center;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 16px rgba(139, 92, 42, 0.18);
+    body {
+      background: #f5f3f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .carousel-img {
-      width: 60px;
-      height: 60px;
+    .main-card {
+      background: #f8f5f2;
+      border-radius: 28px;
+      box-shadow: 0 2px 16px rgba(139,92,42,0.08);
+      max-width: 1000px;
+      margin: 0 auto 35px auto;
+      padding: 2px 24px 32px 24px;
+      border: 6px solid #e5e0da;
+    }
+    .main-card h2 {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 500;
+      margin-bottom: 18px;
+      color: #333;
+    }
+    .action-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 18px;
+      justify-content: flex-end;
+    }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-beige {
+      background: #e5d3bc;
+      color: #5a4632;
+    }
+    .btn-beige:hover {
+      background: #d6c2a8;
+    }
+    .btn-blue {
+      background: #dbe3f7;
+      color: #2a3a5c;
+    }
+    .btn-blue:hover {
+      background: #b7c6e6;
+    }
+    .btn-gray {
+      background: #bdbdbd;
+      color: #333;
+    }
+    .btn-gray:hover {
+      background: #a0a0a0;
+    }
+    .btn-red {
+      background: #ff6b6b;
+      color: white;
+    }
+    .btn-red:hover {
+      background: #e74c3c;
+    }
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(139,92,42,0.06);
+    }
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      font-size: 1rem;
+    }
+    th {
+      background: #ede3d3;
+      color: #5a4632;
+      font-weight: 600;
+    }
+    tr:not(:last-child) td {
+      border-bottom: 1px solid #f0e6d8;
+    }
+    .status-badge {
+      padding: 4px 14px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: #ede3d3;
+      color: #5a4632;
+      display: inline-block;
+    }
+    .status-inactive {
+      background: #ff6b6b;
+      color: #fff;
+    }
+    .img-thumb {
+      width: 48px;
+      height: 48px;
       object-fit: cover;
       border-radius: 8px;
-      margin-right: 4px;
       border: 1px solid #eee;
+      margin-right: 4px;
+      background: #f5f3f0;
     }
-    .carousel-img-wrapper {
+    .img-thumb-wrapper {
       display: flex;
       align-items: center;
       gap: 2px;
     }
+    .modal-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .custom-modal {
+      background: #f8f5f2;
+      border-radius: 22px;
+      box-shadow: 0 8px 32px rgba(139,92,42,0.18);
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto;
+      border: 1px solid #e5e0da;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 24px 24px 24px;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      left: 0;
+      right: 0;
+    }
+    @media (max-width: 500px) {
+      .custom-modal {
+        max-width: 98vw;
+        padding: 12px 4vw 18px 4vw;
+      }
+    }
+    .custom-modal-header {
+      background: #e5d3bc;
+      border-radius: 22px 22px 0 0;
+      padding: 18px 24px 10px 24px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #5a4632;
+      margin-bottom: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .custom-modal-title {
+      flex: 1 1 auto;
+      text-align: left;
+      padding-right: 12px;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+    }
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: #5a4632;
+      font-size: 1.6rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      margin-left: 12px;
+    }
+    .modal-close-btn:hover {
+      background: #e5e0da;
+    }
+    .custom-modal-body {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 10px 24px 0 0px;
+    }
+    .mb-3 {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      margin-bottom: 14px;
+    }
+    .form-label {
+      font-weight: 600;
+      color: #5a4632;
+      margin-bottom: 2px;
+      text-align: left;
+      width: 100%;
+      font-size: 0.95rem;
+      padding-left: 0;
+      margin-left: 0;
+    }
+    .form-control, select, textarea {
+      border-radius: 8px;
+      border: 1.5px solid #e5e0da;
+      padding: 4px 8px;
+      font-size: 0.93rem;
+      margin-bottom: 0;
+      background: #fff;
+      color: #333;
+      box-shadow: none;
+      outline: none;
+      transition: border 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+      margin-left: 0 !important;
+      padding-left: 0 !important;
+      display: block;
+      margin-top: 0;
+    }
+    .form-control:focus, select:focus {
+      border-color: #b7c6e6;
+    }
+    .existing-imgs-label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #333;
+    }
     .remove-img-btn {
-      background: #e74c3c;
+      background: #ff6b6b;
       color: white;
       border: none;
       border-radius: 50%;
@@ -49,100 +264,117 @@
     .remove-img-btn:hover {
       background: #c0392b;
     }
-    .existing-imgs-label {
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #333;
-    }
   </style>
 </head>
 <body>
-  <div class="container mt-4">
-    <div class="hero-section">
-      <h2>My Products</h2>
-      <p>Manage your product catalog, images, and details</p>
+  <div class="main-card">
+    <h2>Product Management</h2>
+    <div class="action-bar">
+      <button class="btn btn-beige" id="printReportBtn">Print Report</button>
+      <button class="btn btn-beige" id="addCategoryBtn">Add Category</button>
+      <button class="btn btn-beige" id="addProductBtn">Add Product</button>
     </div>
-    <button class="btn btn-primary mb-3" id="addProductBtn">Add Product</button>
-    <a href="categories.html" class="btn btn-secondary mb-3">Manage Categories</a>
-    <table class="table table-bordered align-middle" id="productsTable">
+    <table class="table" id="productsTable">
       <thead>
         <tr>
-          <th>Images</th>
+          <th>Id</th>
           <th>Name</th>
-          <th>Category</th>
-          <th>SKU</th>
           <th>Price</th>
+          <th>Category</th>
+          <th>Photo</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- Products will be loaded here -->
-      </tbody>
+          <tbody>
+            <!-- Products will be loaded here -->
+          </tbody>
     </table>
-  </div>
+      </div>
 
   <!-- Add/Edit Product Modal -->
-  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form id="productForm" enctype="multipart/form-data">
-          <div class="modal-header">
-            <h5 class="modal-title" id="productModalLabel">Add/Edit Product</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal modal-bg" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true" style="display:none;">
+    <div class="custom-modal">
+      <form id="productForm" enctype="multipart/form-data">
+        <div class="custom-modal-header">
+          <span class="custom-modal-title">Add/Edit Product</span>
+          <button type="button" class="modal-close-btn" id="closeProductModalBtn" aria-label="Close">&times;</button>
+        </div>
+        <div class="custom-modal-body">
+          <input type="hidden" id="productId">
+          <div class="mb-3">
+            <label for="productName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="productName" name="name" required>
+    </div>
+          <div class="mb-3">
+            <label for="productCategory" class="form-label">Category</label>
+            <select class="form-control" id="productCategory" name="category_id" required></select>
+  </div>
+          <div class="mb-3">
+            <label for="productSKU" class="form-label">SKU</label>
+            <input type="text" class="form-control" id="productSKU" name="sku" required>
           </div>
-          <div class="modal-body">
-            <input type="hidden" id="productId">
-            <div class="mb-3">
-              <label for="productName" class="form-label">Name</label>
-              <input type="text" class="form-control" id="productName" name="name" required>
-            </div>
-            <div class="mb-3">
-              <label for="productCategory" class="form-label">Category</label>
-              <select class="form-control" id="productCategory" name="category_id" required></select>
-            </div>
-            <div class="mb-3">
-              <label for="productSKU" class="form-label">SKU</label>
-              <input type="text" class="form-control" id="productSKU" name="sku" required>
-            </div>
-            <div class="mb-3">
-              <label for="productPrice" class="form-label">Price</label>
-              <input type="number" class="form-control" id="productPrice" name="sell_price" required min="0" step="0.01">
-            </div>
-            <div class="mb-3">
-              <label for="productStock" class="form-label">Stock</label>
-              <input type="number" class="form-control" id="productStock" name="stock" required min="0" step="1">
-            </div>
-            <div class="mb-3">
-              <label for="productImages" class="form-label">Product Images</label>
-              <input type="file" class="form-control" id="productImages" name="images" accept="image/*" multiple>
-              <div id="existingImagesSection" class="mt-2" style="display:none;">
-                <div class="existing-imgs-label">Existing Images:</div>
-                <div id="existingImages" class="carousel-img-wrapper"></div>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label for="productStatus" class="form-label">Status</label>
-              <select class="form-control" id="productStatus" name="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="productDescription" class="form-label">Description</label>
-              <textarea class="form-control" id="productDescription" name="description"></textarea>
+          <div class="mb-3">
+            <label for="productPrice" class="form-label">Price</label>
+            <input type="number" class="form-control" id="productPrice" name="sell_price" required min="0" step="0.01">
+          </div>
+          <div class="mb-3">
+            <label for="productStock" class="form-label">Stock</label>
+            <input type="number" class="form-control" id="productStock" name="stock" required min="0" step="1">
+          </div>
+          <div class="mb-3">
+            <label for="productImages" class="form-label">Product Images</label>
+            <input type="file" class="form-control" id="productImages" name="images" accept="image/*" multiple>
+            <div id="existingImagesSection" class="mt-2" style="display:none;">
+              <div class="existing-imgs-label">Existing Images:</div>
+              <div id="existingImages" class="img-thumb-wrapper"></div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save</button>
+          <div class="mb-3">
+            <label for="productStatus" class="form-label">Status</label>
+            <select class="form-control" id="productStatus" name="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
           </div>
-        </form>
-      </div>
+          <div class="mb-3">
+            <label for="productDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="productDescription" name="description"></textarea>
+          </div>
+        </div>
+        <div class="custom-modal-footer">
+          <button type="button" class="btn btn-gray" id="cancelProductBtn">Cancel</button>
+          <button type="submit" class="btn btn-blue">Save</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Modal open/close logic: always allow opening after closing
+    document.addEventListener('DOMContentLoaded', function() {
+      var closeBtn = document.getElementById('closeProductModalBtn');
+      var modal = document.getElementById('productModal');
+      var addBtn = document.getElementById('addProductBtn');
+      var cancelBtn = document.getElementById('cancelProductBtn');
+      if (closeBtn && modal) {
+        closeBtn.addEventListener('click', function() {
+          modal.style.display = 'none';
+        });
+      }
+      if (addBtn && modal) {
+        addBtn.addEventListener('click', function() {
+          modal.style.display = 'flex';
+        });
+      }
+      if (cancelBtn && modal) {
+        cancelBtn.addEventListener('click', function() {
+          modal.style.display = 'none';
+        });
+      }
+    });
+  </script>
   <script src="../js/seller.js"></script>
 </body>
 </html> 

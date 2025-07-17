@@ -33,9 +33,17 @@ function requireSellerRole(req, res, next) {
 router.get('/seller/products', authenticateJWT, requireSellerRole, async (req, res) => {
   try {
     const [products] = await db.query('SELECT * FROM item WHERE seller_id = ?', [req.user.id]);
-    // Parse image JSON for each product
+    // Parse image JSON or comma-separated string for each product
     products.forEach(p => {
-      try { p.image = JSON.parse(p.image); } catch { p.image = []; }
+      try {
+        p.image = JSON.parse(p.image);
+        if (!Array.isArray(p.image)) throw new Error();
+      } catch {
+        // Fallback: split by comma if not JSON
+        p.image = typeof p.image === 'string' && p.image.trim() !== ''
+          ? p.image.split(',').map(s => s.trim()).filter(Boolean)
+          : [];
+      }
     });
     res.json({ success: true, products });
   } catch (err) {
@@ -138,6 +146,18 @@ router.delete('/seller/products/:id/image', authenticateJWT, requireSellerRole, 
     res.json({ success: true, message: 'Image removed.' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to remove image.' });
+  }
+});
+
+// DELETE a product
+router.delete('/seller/products/:id', authenticateJWT, requireSellerRole, async (req, res) => {
+  try {
+    // Optionally: delete images from disk here if needed
+    await db.query('DELETE FROM item WHERE item_id = ? AND seller_id = ?', [req.params.id, req.user.id]);
+    await db.query('DELETE FROM stock WHERE item_id = ?', [req.params.id]);
+    res.json({ success: true, message: 'Product deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete product.' });
   }
 });
 

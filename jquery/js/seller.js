@@ -1,166 +1,360 @@
+// IMPORTANT: If you get CORS errors, add this to your Node.js backend (e.g., in app.js):
+// const cors = require('cors');
+// app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
 // seller.js
 
 document.addEventListener('DOMContentLoaded', function() {
+  if (!ensureSellerAuth()) return;
   // Role check
   if (localStorage.getItem('user_role') !== 'seller') {
     window.location.href = '../login.html?reason=unauthorized';
     return;
   }
-
-  // Determine which page we're on
-  const isProductPage = window.location.pathname.includes('products.html');
-  const isCategoryPage = window.location.pathname.includes('categories.html');
-
-  if (isProductPage) initProductPage();
-  if (isCategoryPage) initCategoryPage();
+  // Only use the modern approach for products
+  if (document.querySelector('#productsTable')) {
+    loadAndRenderProducts();
+    setupProductFormEvents();
+  }
+  // Category page logic (unchanged)
+  if (window.location.pathname.includes('categories.html')) {
+    initCategoryPage();
+  }
 });
 
-// ---------------- PRODUCTS ----------------
-function initProductPage() {
-  const productsTable = document.getElementById('productsTable').getElementsByTagName('tbody')[0];
-  const addBtn = document.getElementById('addProductBtn');
-  const productModal = new bootstrap.Modal(document.getElementById('productModal'));
-  const productForm = document.getElementById('productForm');
+// Set the correct API base and paths for a backend mounted at /api/v1
+const API_BASE = 'http://localhost:4000';
+const PRODUCTS_API = API_BASE + '/api/v1/seller/products';
+const CATEGORIES_API = API_BASE + '/api/v1/seller/categories';
 
-  let categories = [];
-  let editingId = null;
+// Utility: Get JWT and check role
+function getJwt() {
+  return localStorage.getItem('jwt_token');
+}
+function getUserRole() {
+  return localStorage.getItem('user_role');
+}
+function ensureSellerAuth() {
+  const jwt = getJwt();
+  const role = getUserRole();
+  if (!jwt || role !== 'seller') {
+    window.location.href = '../login.html?reason=unauthorized';
+    return false;
+  }
+  return true;
+}
 
-  // Load categories for dropdown
-  fetchCategories().then(cats => {
-    categories = cats;
-    populateCategoryDropdown();
-  });
+// Utility to escape HTML
+function escapeHtml(text) {
+  return text ? text.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[c])) : '';
+}
 
-  // Load products
-  loadProducts();
+// Action buttons for product table
+function getActionButtons(product) {
+  const statusBtn = product.status === 'active'
+    ? `<button class="btn btn-gray btn-sm status-btn" data-id="${product.item_id}" title="Set Inactive">Inactive</button>`
+    : `<button class="btn btn-blue btn-sm status-btn" data-id="${product.item_id}" title="Set Active">Active</button>`;
+  return `
+    <button class="btn btn-red btn-sm delete-btn" data-id="${product.item_id}" title="Delete">Delete</button>
+    <button class="btn btn-beige btn-sm edit-btn" data-id="${product.item_id}" title="Edit">Edit</button>
+    ${statusBtn}
+  `;
+}
 
-  addBtn.onclick = function() {
-    editingId = null;
-    productForm.reset();
-    document.getElementById('productId').value = '';
-    productModal.show();
-    populateCategoryDropdown();
-  };
-
-  productForm.onsubmit = function(e) {
-    e.preventDefault();
-    const data = {
-      category_id: document.getElementById('productCategory').value,
-      name: document.getElementById('productName').value,
-      sku: document.getElementById('productSKU').value,
-      sell_price: document.getElementById('productPrice').value,
-      image: document.getElementById('productImage').value,
-      status: document.getElementById('productStatus').value,
-      description: document.getElementById('productDescription') ? document.getElementById('productDescription').value : ''
-    };
-    if (editingId) {
-      updateProduct(editingId, data, () => {
-        productModal.hide();
-        loadProducts();
-      });
-    } else {
-      addProduct(data, () => {
-        productModal.hide();
-        loadProducts();
-      });
+// Render products in the table
+function renderProductsTable(products, categories) {
+  const tbody = document.querySelector('#productsTable tbody');
+  tbody.innerHTML = '';
+  if (!products || products.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="7" style="text-align:center; color:#aaa;">No products found.</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+  products.forEach(product => {
+    const tr = document.createElement('tr');
+    // Id
+    tr.innerHTML += `<td>${product.item_id}</td>`;
+    // Name
+    tr.innerHTML += `<td>${escapeHtml(product.name)}</td>`;
+    // Price
+    tr.innerHTML += `<td>₱${parseFloat(product.sell_price).toLocaleString()}</td>`;
+    // Category
+    const cat = categories.find(c => c.category_id == product.category_id);
+    tr.innerHTML += `<td>${cat ? escapeHtml(cat.name) : ''}</td>`;
+    // Photo (thumbnails)
+    let imgs = '';
+    if (Array.isArray(product.image) && product.image.length > 0) {
+      imgs = `<img src="${product.image[0]}" class="img-thumb" alt="Product Image">`;
+      if (product.image.length > 1) {
+        imgs += `<span class="photo-count-box">${product.image.length}+</span>`;
+      }
     }
-  };
+    tr.innerHTML += `<td><div class="img-thumb-wrapper">${imgs}</div></td>`;
+    // Status
+    const statusClass = product.status === 'inactive' ? 'status-badge status-inactive' : 'status-badge';
+    tr.innerHTML += `<td><span class="${statusClass}">${escapeHtml(product.status)}</span></td>`;
+    // Actions
+    tr.innerHTML += `<td>${getActionButtons(product)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
 
-  function populateCategoryDropdown() {
-    const select = document.getElementById('productCategory');
-    select.innerHTML = '';
+// Fetch and render products and categories with detailed error logging
+async function loadAndRenderProducts() {
+  if (!ensureSellerAuth()) return;
+  try {
+    const [productsRes, categoriesRes] = await Promise.all([
+      fetch(PRODUCTS_API, { headers: { 'Authorization': 'Bearer ' + getJwt() } }),
+      fetch(CATEGORIES_API, { headers: { 'Authorization': 'Bearer ' + getJwt() } })
+    ]);
+    const productsData = await productsRes.json();
+    const categoriesData = await categoriesRes.json();
+    if (productsData.success && categoriesData.success) {
+      renderProductsTable(productsData.products, categoriesData.categories);
+      window._lastProducts = productsData.products; // Store for quick access
+      window._lastCategories = categoriesData.categories;
+    } else {
+      renderProductsTable([], []);
+      if (!productsData.success) {
+        console.error('Products API error:', productsData);
+        alert(productsData.message || 'Failed to load products.');
+      }
+      if (!categoriesData.success) {
+        console.error('Categories API error:', categoriesData);
+        alert(categoriesData.message || 'Failed to load categories.');
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching products or categories:', err);
+    alert('Error fetching products or categories. See console for details.');
+    renderProductsTable([], []);
+  }
+}
+
+// Helper: Populate category dropdown from database
+async function populateCategoryDropdown(selectedId = null) {
+  const select = document.getElementById('productCategory');
+  select.innerHTML = '';
+  // Add a blank option at the top
+  const blankOpt = document.createElement('option');
+  blankOpt.value = '';
+  blankOpt.textContent = 'Select a category...';
+  select.appendChild(blankOpt);
+  try {
+    const categories = await fetchCategories();
     categories.forEach(cat => {
       const opt = document.createElement('option');
       opt.value = cat.category_id;
       opt.textContent = cat.name;
+      if (selectedId && selectedId == cat.category_id) opt.selected = true;
       select.appendChild(opt);
     });
+    // If not editing, leave blank option selected
+    if (!selectedId) select.value = '';
+  } catch (err) {
+    select.innerHTML = '<option value="">Failed to load categories</option>';
   }
+}
 
-  function loadProducts() {
-    const API_BASE = 'http://localhost:4000';
-    fetch(API_BASE + '/api/v1/seller/products', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
-    })
-      .then(res => res.json())
-      .then(data => {
-        productsTable.innerHTML = '';
-        if (data.success && data.products) {
-          data.products.forEach(prod => {
-            const row = productsTable.insertRow();
-            row.insertCell().textContent = prod.name;
-            row.insertCell().textContent = categories.find(c => c.category_id == prod.category_id)?.name || '';
-            row.insertCell().textContent = prod.sku;
-            row.insertCell().textContent = prod.sell_price;
-            row.insertCell().textContent = prod.status;
-            const actions = row.insertCell();
-            actions.innerHTML = `
-              <button class="btn btn-sm btn-warning edit-btn">Edit</button>
-              <button class="btn btn-sm btn-danger delete-btn">Delete</button>
-            `;
-            actions.querySelector('.edit-btn').onclick = function() {
-              editingId = prod.item_id;
-              document.getElementById('productId').value = prod.item_id;
-              document.getElementById('productName').value = prod.name;
-              document.getElementById('productCategory').value = prod.category_id;
-              document.getElementById('productSKU').value = prod.sku;
-              document.getElementById('productPrice').value = prod.sell_price;
-              document.getElementById('productImage').value = prod.image;
-              document.getElementById('productStatus').value = prod.status;
-              productModal.show();
-            };
-            actions.querySelector('.delete-btn').onclick = function() {
-              if (confirm('Delete this product?')) {
-                deleteProduct(prod.item_id, loadProducts);
-              }
-            };
-          });
+// Update showProductModal to always populate categories
+function showProductModal(editing = false, product = null) {
+  const modal = document.getElementById('productModal');
+  const form = document.getElementById('productForm');
+  form.reset();
+  document.getElementById('productId').value = '';
+  document.getElementById('existingImagesSection').style.display = 'none';
+  // Set modal title
+  const modalTitle = document.querySelector('.custom-modal-title');
+  if (modalTitle) {
+    modalTitle.textContent = editing ? 'Edit Product' : 'Add Product';
+  }
+  // Always populate categories before showing modal
+  populateCategoryDropdown(editing && product ? product.category_id : null);
+  if (editing && product) {
+    document.getElementById('productId').value = product.item_id;
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productSKU').value = product.sku;
+    document.getElementById('productPrice').value = product.sell_price;
+    document.getElementById('productStock').value = product.stock || '';
+    document.getElementById('productStatus').value = product.status;
+    document.getElementById('productDescription').value = product.description || '';
+    // Show existing images
+    if (Array.isArray(product.image) && product.image.length > 0) {
+      const existingImages = document.getElementById('existingImages');
+      existingImages.innerHTML = product.image.map(img => `<img src="${img}" class="img-thumb" alt="Product Image">`).join('');
+      document.getElementById('existingImagesSection').style.display = 'block';
+    }
+  }
+  modal.style.display = 'flex';
+}
+function hideProductModal() {
+  document.getElementById('productModal').style.display = 'none';
+}
+
+// Event listeners for Add Product, Edit, Cancel, Close, and table actions
+function setupProductFormEvents() {
+  // Modal open/close
+  document.getElementById('addProductBtn').onclick = () => showProductModal(false);
+  document.getElementById('cancelProductBtn').onclick = hideProductModal;
+  document.getElementById('closeProductModalBtn').onclick = hideProductModal;
+  // Form submit
+  document.getElementById('productForm').onsubmit = function(e) {
+    e.preventDefault();
+    if (!ensureSellerAuth()) return;
+    const editingId = document.getElementById('productId').value;
+    const formData = new FormData(this);
+    // Always set all required fields (except images, which is handled by the browser)
+    formData.set('category_id', document.getElementById('productCategory').value);
+    formData.set('name', document.getElementById('productName').value);
+    formData.set('sku', document.getElementById('productSKU').value);
+    formData.set('sell_price', document.getElementById('productPrice').value);
+    formData.set('stock', document.getElementById('productStock').value);
+    formData.set('status', document.getElementById('productStatus').value);
+    formData.set('description', document.getElementById('productDescription').value || '');
+    // Do NOT set 'images' in JS; let the browser handle file uploads
+    // Debug: log all FormData keys/values
+    for (let pair of formData.entries()) {
+      console.log(pair[0]+ ': ' + pair[1]);
+    }
+    if (editingId) {
+      updateProduct(editingId, formData, (res) => {
+        if (res && res.success) {
+          hideProductModal();
+          loadAndRenderProducts();
+        } else {
+          alert(res && res.message ? res.message : 'Failed to update product.');
         }
       });
-  }
+    } else {
+      addProduct(formData, (res) => {
+        if (res && res.success) {
+          hideProductModal();
+          loadAndRenderProducts();
+        } else {
+          alert(res && res.message ? res.message : 'Failed to add product.');
+        }
+      });
+    }
+  };
+  // Table actions (edit, delete, status, add photo)
+  document.querySelector('#productsTable').addEventListener('click', function(e) {
+    const rowBtn = e.target.closest('button');
+    if (!rowBtn) return;
+    const id = rowBtn.dataset.id;
+    const product = window._lastProducts.find(p => p.item_id == id);
+    if (rowBtn.classList.contains('edit-btn')) {
+      showProductModal(true, product);
+    } else if (rowBtn.classList.contains('delete-btn')) {
+      console.log('Delete clicked for id:', id);
+      if (confirm('Delete this product?')) {
+        deleteProduct(id, (res) => {
+          if (res && res.success) {
+            loadAndRenderProducts();
+          } else {
+            alert(res && res.message ? res.message : 'Failed to delete product.');
+          }
+        });
+      }
+    } else if (rowBtn.classList.contains('status-btn')) {
+      // Toggle status
+      const newStatus = product.status === 'active' ? 'inactive' : 'active';
+      const formData = new FormData();
+      formData.set('category_id', product.category_id);
+      formData.set('name', product.name);
+      formData.set('description', product.description);
+      formData.set('sku', product.sku);
+      formData.set('sell_price', product.sell_price);
+      formData.set('status', newStatus);
+      formData.set('stock', product.stock || 0);
+      updateProduct(id, formData, (res) => {
+        if (res && res.success) {
+          loadAndRenderProducts();
+        } else {
+          alert(res && res.message ? res.message : 'Failed to update status.');
+        }
+      });
+    } else if (rowBtn.classList.contains('add-photo-btn')) {
+      alert('Add photo feature coming soon!');
+    }
+  });
 }
 
-function addProduct(data, cb) {
-  const API_BASE = 'http://localhost:4000';
-  fetch(API_BASE + '/api/v1/seller/products', {
+// Add product (multipart/form-data)
+function addProduct(formData, cb) {
+  if (!ensureSellerAuth()) return;
+  fetch(PRODUCTS_API, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+      'Authorization': 'Bearer ' + getJwt()
     },
-    body: JSON.stringify(data)
+    body: formData
   })
-    .then(res => res.json())
-    .then(cb);
+    .then(async res => {
+      let data;
+      try { data = await res.json(); } catch { data = { success: false, message: 'Invalid JSON from server.' }; }
+      if (!res.ok) {
+        console.error('Add product error:', data);
+        alert(data.message || 'Failed to add product.');
+      }
+      cb(data);
+    })
+    .catch(err => {
+      console.error('Add product error:', err);
+      alert('Failed to add product. See console for details.');
+    });
 }
 
-function updateProduct(id, data, cb) {
-  const API_BASE = 'http://localhost:4000';
-  fetch(API_BASE + '/api/v1/seller/products/' + id, {
+// Update product (multipart/form-data)
+function updateProduct(id, formData, cb) {
+  if (!ensureSellerAuth()) return;
+  fetch(PRODUCTS_API + '/' + id, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+      'Authorization': 'Bearer ' + getJwt()
     },
-    body: JSON.stringify(data)
+    body: formData
   })
-    .then(res => res.json())
-    .then(cb);
+    .then(async res => {
+      let data;
+      try { data = await res.json(); } catch { data = { success: false, message: 'Invalid JSON from server.' }; }
+      if (!res.ok) {
+        console.error('Update product error:', data);
+        alert(data.message || 'Failed to update product.');
+      }
+      cb(data);
+    })
+    .catch(err => {
+      console.error('Update product error:', err);
+      alert('Failed to update product. See console for details.');
+    });
 }
 
+// Delete product
 function deleteProduct(id, cb) {
-  const API_BASE = 'http://localhost:4000';
-  fetch(API_BASE + '/api/v1/seller/products/' + id, {
+  if (!ensureSellerAuth()) return;
+  fetch(PRODUCTS_API + '/' + id, {
     method: 'DELETE',
     headers: {
-      'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+      'Authorization': 'Bearer ' + getJwt()
     }
   })
-    .then(res => res.json())
-    .then(cb);
+    .then(async res => {
+      let data;
+      try { data = await res.json(); } catch { data = { success: false, message: 'Invalid JSON from server.' }; }
+      if (!res.ok) {
+        console.error('Delete product error:', data);
+        alert(data.message || 'Failed to delete product.');
+      }
+      cb(data);
+    })
+    .catch(err => {
+      console.error('Delete product error:', err);
+      alert('Failed to delete product. See console for details.');
+    });
 }
 
-// ---------------- CATEGORIES ----------------
+// ---------------- CATEGORIES (unchanged) ----------------
 function initCategoryPage() {
   const categoriesTable = document.getElementById('categoriesTable').getElementsByTagName('tbody')[0];
   const addBtn = document.getElementById('addCategoryBtn');
@@ -198,12 +392,16 @@ function initCategoryPage() {
   };
 
   function loadCategories() {
-    const API_BASE = 'http://localhost:4000';
-    fetch(API_BASE + '/api/v1/seller/categories', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+    fetch(CATEGORIES_API, {
+      headers: { 'Authorization': 'Bearer ' + getJwt() }
     })
-      .then(res => res.json())
-      .then(data => {
+      .then(async res => {
+        let data;
+        try { data = await res.json(); } catch { data = { success: false, message: 'Invalid JSON from server.' }; }
+        if (!res.ok) {
+          console.error('Fetch categories error:', data);
+          alert(data.message || 'Failed to fetch categories.');
+        }
         categoriesTable.innerHTML = '';
         if (data.success && data.categories) {
           data.categories.forEach(cat => {
@@ -236,50 +434,91 @@ function initCategoryPage() {
 }
 
 function fetchCategories() {
-  const API_BASE = 'http://localhost:4000';
-  return fetch(API_BASE + '/api/v1/seller/categories', {
-    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+  return fetch(CATEGORIES_API, {
+    headers: { 'Authorization': 'Bearer ' + getJwt() }
   })
-    .then(res => res.json())
-    .then(data => data.success ? data.categories : []);
+    .then(async res => {
+      let data;
+      try { data = await res.json(); } catch { data = { success: false, message: 'Invalid JSON from server.' }; }
+      if (!res.ok) {
+        console.error('Fetch categories error:', data);
+        alert(data.message || 'Failed to fetch categories.');
+      }
+      return data.success ? data.categories : [];
+    })
+    .catch(err => {
+      console.error('Fetch categories error:', err);
+      alert('Failed to fetch categories. See console for details.');
+      return [];
+    });
 }
 
 function addCategory(data, cb) {
-  const API_BASE = 'http://localhost:4000';
-  fetch(API_BASE + '/api/v1/seller/categories', {
+  fetch(CATEGORIES_API, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+      'Authorization': 'Bearer ' + getJwt()
     },
     body: JSON.stringify(data)
   })
-    .then(res => res.json())
-    .then(cb);
+    .then(async res => {
+      let resp;
+      try { resp = await res.json(); } catch { resp = { success: false, message: 'Invalid JSON from server.' }; }
+      if (!res.ok) {
+        console.error('Add category error:', resp);
+        alert(resp.message || 'Failed to add category.');
+      }
+      cb(resp);
+    })
+    .catch(err => {
+      console.error('Add category error:', err);
+      alert('Failed to add category. See console for details.');
+    });
 }
 
 function updateCategory(id, data, cb) {
-  const API_BASE = 'http://localhost:4000';
-  fetch(API_BASE + '/api/v1/seller/categories/' + id, {
+  fetch(CATEGORIES_API + '/' + id, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+      'Authorization': 'Bearer ' + getJwt()
     },
     body: JSON.stringify(data)
   })
-    .then(res => res.json())
-    .then(cb);
+    .then(async res => {
+      let resp;
+      try { resp = await res.json(); } catch { resp = { success: false, message: 'Invalid JSON from server.' }; }
+      if (!res.ok) {
+        console.error('Update category error:', resp);
+        alert(resp.message || 'Failed to update category.');
+      }
+      cb(resp);
+    })
+    .catch(err => {
+      console.error('Update category error:', err);
+      alert('Failed to update category. See console for details.');
+    });
 }
 
 function deleteCategory(id, cb) {
-  const API_BASE = 'http://localhost:4000';
-  fetch(API_BASE + '/api/v1/seller/categories/' + id, {
+  fetch(CATEGORIES_API + '/' + id, {
     method: 'DELETE',
     headers: {
-      'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+      'Authorization': 'Bearer ' + getJwt()
     }
   })
-    .then(res => res.json())
-    .then(cb);
+    .then(async res => {
+      let resp;
+      try { resp = await res.json(); } catch { resp = { success: false, message: 'Invalid JSON from server.' }; }
+      if (!res.ok) {
+        console.error('Delete category error:', resp);
+        alert(resp.message || 'Failed to delete category.');
+      }
+      cb(resp);
+    })
+    .catch(err => {
+      console.error('Delete category error:', err);
+      alert('Failed to delete category. See console for details.');
+    });
 } 
